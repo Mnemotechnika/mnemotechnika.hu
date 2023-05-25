@@ -16,7 +16,7 @@
     // Program starts here. Creates a sample graph in the
     		// DOM node with the specified ID. This function is invoked
     		// from the onLoad event handler of the document (see below).
-    		function main(container)
+    		function main(container, project)
     		{
     			// Checks if the browser is supported
     			if (!mxClient.isBrowserSupported())
@@ -31,6 +31,11 @@
     				
     				// Creates the graph inside the given container
     				var graph = new mxGraph(container);
+                    graph.setCellsMovable(true);
+                    graph.setPanning(true);
+				    graph.centerZoom = false;
+				    graph.panningHandler.useLeftButtonForPanning = true
+
     
     				// Enables rubberband selection
     				new mxRubberband(graph);
@@ -56,7 +61,7 @@
     					graph.updateCellSize(e11);
     					
     					// Sets the vertical edge position
-    					e1.geometry.points = [new mxPoint(300, 120)];
+    					//e1.geometry.points = [new mxPoint(300, 120)];
     					
     					// Adds padding (labelPadding not working...)
     					e11.geometry.width += 16;
@@ -66,14 +71,13 @@
     					e11.geometry.offset = new mxPoint(-e11.geometry.width / 2, -e11.geometry.height / 2);
     					
     					// Edge from right to left
-    					var e2 = graph.insertEdge(parent, null, '', v2, v1,
-    						'strokeColor=#69b630;strokeWidth=3;endArrow=block;endSize=8;edgeStyle=elbowEdgeStyle;');
-    					var e21 = graph.insertVertex(e2, null, 'Text', 0.5, 0, 1, 1,
+    					var e2 = graph.insertEdge(parent, null, '', v2, v1 );
+    					var e21 = graph.insertVertex(v2, null, 'Text', .1, 0, 0, 0,
     						'fontSize=16;fontColor=#000000;fillColor=#ffffff;strokeColor=#69b630;rounded=1;arcSize=25;strokeWidth=3;', true);
     					graph.updateCellSize(e21);
     					
     					// Sets the vertical edge position
-    					e2.geometry.points = [new mxPoint(300, 320)];
+    					//e2.geometry.points = [new mxPoint(300, 320)];
     					
     					// Adds padding (labelPadding not working...)
     					e21.geometry.width += 16;
@@ -81,6 +85,30 @@
     					
     					// Centers the label
     					e21.geometry.offset = new mxPoint(-e11.geometry.width / 2, -e11.geometry.height / 2);
+
+
+                        Object.keys( project ).forEach( function ( place, index ) {
+                            var i = Object.keys( project[ place ] ).length - 1 ;
+                            Object.keys( project[ place ] ).forEach( cable => {
+                                if ( cable == "box" ) {
+                                    console.log( i )
+                                    project[ place ][ cable ].vertex = graph.insertVertex( 
+                                        parent, 
+                                        null, 
+                                        place, 
+                                        project[ place ][ cable ].x, 
+                                        project[ place ][ cable ].y, 
+                                        100, 
+                                        100 * i,
+                                        project[ place ][ cable ].style 
+                                    );
+                                } else {
+                                    
+                                }
+                            });
+                        });
+
+
     				}
     				finally
     				{
@@ -88,19 +116,52 @@
     					graph.getModel().endUpdate();
     				}
     				
-    							}
+    			}
     		};
+            function weld( place, source, target ) {
+                source = ''; //make a colored Vertex
+                target = ''; //make a colored Vertex
+                //make a colord Edge for weld
+            }
+
+
+
+            
+            var Dadpuszta = {
+                ArtiBarn: {
+                    box: {
+                        x: 100, 
+                        y: 100,
+                        style: "fontSize=16;align=left;spacingTop=10;spacingLeft=10;verticalAlign=top;fontColor=#ffffff;fillColor=#1e4093;rounded=1;strokeColor=none;"
+                    },
+                    Nautilus: {},
+                    ArtistCamp: {},
+                    Trafo1: {},
+                    Trafo2: {}
+                },
+                Tafo1: {
+                    box: {
+                        x: 10, 
+                        y: 10,
+                        style: "fontSize=16;align=left;spacingTop=10;spacingLeft=10;verticalAlign=top;fontColor=#ffffff;fillColor=#1e4093;rounded=1;strokeColor=none;"
+                    },
+                    OZORAStage: {}
+                }
+            }
+
+            weld( Dadpuszta.ArtiBarn.ArtistCamp.red, Dadpuszta.ArtiBarn.Nautilus.red );
+            //patch( Dadpuszta.ArtiBarn.ArtistCamp.blue Dadpuszta.ArtiBarn.Trafo1.blue );
+
   </script>
 
 </head>
 
 <!-- Page passes the container for the graph to the program -->
 
-<body onload="main(document.getElementById('graphContainer'))">
+<body style="margin:0;" onload="main( document.getElementById( 'graphContainer' ), Dadpuszta )">
 
   <!-- Creates a container for the graph with a grid wallpaper -->
-  <div id="graphContainer" style="position:relative;overflow:scroll;width:100%;height:100%;background:url('https://jgraph.github.io/mxgraph/javascript/examples/editors/images/grid.gif');cursor:default;">
-  </div>
+  <div id="graphContainer" style="position:relative;overflow:none;width:3000;height:5000;background:url('dadmap2.jpg');cursor:default;"></div>
 </body>
 
 </html>
