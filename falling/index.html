@@ -1,0 +1,115 @@
+<html>
+	<head>
+		<script src="pixi-legacy.min.js"></script>
+		<style>
+			* {
+				margin: 0;
+				background: none;
+				overflow: hidden;
+			}
+			html {
+				background-color:  darkred;
+			}
+			html:not(:hover), body:not(:hover){
+    			background-color: black;
+			}
+		</style>
+	</head>
+	<body>
+		<script>
+			window.onload = function() {
+				
+				var keys = {};
+				window.addEventListener( "keydown", evemt => {
+					keys[ event.keyCode ] = true;
+				});
+				window.addEventListener( "keyup", event => {
+					keys[ event.keyCode ] = false;
+				});
+
+				function handleOrientation( event ) {
+					scale = 2 - Math.round( event.beta || 0 ) / 100;
+				}
+				function handleMove( event ) {
+					scale = 2- Math.round( event.clientX - ( window.innerWidth / 2 ) ) / 100;
+				}
+				function devOr() {
+					if ( typeof DeviceOrientationEvent === 'function' ) { 
+						if ( typeof DeviceOrientationEvent.requestPermission === 'function' ) {
+							DeviceOrientationEvent.requestPermission().then( response => {
+								if ( response == 'granted' ) window.addEventListener( 'deviceorientation', handleOrientation )
+							}).catch( console.error )
+						} else window.addEventListener( 'deviceorientation', handleOrientation );
+					}
+				}
+				//window.addEventListener( 'mousemove', handleMove );
+				//devOr();
+
+				const app = new PIXI.Application({ 
+					background: 'darkred', 
+					resizeTo: window 
+				});
+
+				const floating = [];
+				const falling = [];
+				var animation = floating;
+				var animationSpeed = 0.3;
+				var scale = 1;
+				var scaleSpeed = 0.01;
+				var isFalling= false;
+
+				PIXI.Assets.load( 'falling.json' ).then( () => {
+
+					for ( let i = 0; i < 45; i++)  {
+						const val = i < 10 ? `0${ i }` : i;
+						falling.push( PIXI.Texture.from( `FALL-${ val }.png` ) );
+						floating.push( PIXI.Texture.from( `FLOAT-${ val }.png` ) );
+					}
+
+					const anim = new PIXI.AnimatedSprite( animation );
+					anim.x = app.screen.width / 2;
+					anim.y = app.screen.height / 2;
+					anim.anchor.set( 0.5 );
+					anim.animationSpeed = animationSpeed;
+					anim.loop = false;
+					anim.play();
+					app.stage.addChild( anim );
+
+					app.ticker.add( () => {
+						if ( keys[ "40" ] ) {
+							if ( !isFalling ) anim.animationSpeed = 1.2;
+							scale = 0.5;
+							animation = falling;
+							animationSpeed = 0.3;
+						}
+						if ( !anim.playing  ) {
+							anim.textures = animation;
+							isFalling = ( anim.textures == falling ) ? true : false;
+							if ( !isFalling ) scale = 1;
+							anim.animationSpeed = animationSpeed;
+							anim.play();
+							animation = floating;
+						}
+						if ( anim.scale.x > scale ) {
+							anim.scale.x -= scaleSpeed;
+							anim.scale.y -= scaleSpeed;
+						}
+						if ( anim.scale.x < scale ) {
+							anim.scale.x += scaleSpeed;
+							anim.scale.y += scaleSpeed;
+						}
+					});
+				}).catch( console.error );
+
+				document.body.appendChild( app.view );
+				window.addEventListener( 'resize', ( event ) => {
+					app.renderer.resize( window.innerWidth, window.innerHeight );
+					app.stage.children.forEach( function( item, index, object ) {
+						item.x = app.screen.width * item.anchor.x;
+						item.y = app.screen.height * item.anchor.y;
+					});
+				});
+			}
+		</script>
+	</head>
+</html>
