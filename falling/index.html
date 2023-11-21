@@ -49,7 +49,12 @@
 					background: 'darkred', 
 					resizeTo: window 
 				});
-
+				const GROUPS = {
+  					back: new PIXI.layers.Group(0, true),
+  					mid: new PIXI.layers.Group(1, true),
+					figure: new PIXI.layers.Group(2, true),
+					front: new PIXI.layers.Group(3, true)
+				};
 				const floating = [];
 				const falling = [];
 				var animation = floating;
@@ -66,13 +71,27 @@
 						floating.push( PIXI.Texture.from( `assets/FLOAT-${ val }.png` ) );
 					}
 
-					const anim = new PIXI.AnimatedSprite( animation );
-					anim.x = app.screen.width / 2;
-					anim.y = app.screen.height / 2;
-					anim.anchor.set( 0.5 );
-					anim.animationSpeed = animationSpeed;
-					anim.loop = false;
-					anim.play();
+					const figure = new PIXI.AnimatedSprite( animation );
+					figure.x = app.screen.width / 2;
+					figure.y = app.screen.height / 2;
+					figure.anchor.set( 0.5 );
+					figure.animationSpeed = animationSpeed;
+					figure.loop = false;
+					figure.parentGroup = GROUPS.figure;
+					figure.play();
+
+
+
+					app.stage.addChild( new PIXI.layers.layer( GROUPS.back ) );
+					app.stage.addChild( new PIXI.layers.layer( GROUPS.mid ) );
+					app.stage.addChild( new PIXI.layers.layer( GROUPS.figure ) );
+					app.stage.addChild( new PIXI.layers.layer( GROUPS.front ) );
+
+
+
+
+
+
 					app.stage.addChild( anim );
 
 					app.ticker.add( () => {
