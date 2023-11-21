@@ -49,6 +49,10 @@
 					background: 'darkred', 
 					resizeTo: window 
 				});
+				
+				const back = new PIXI.Container();
+				const mid = new PIXI.Container();
+				const front = new PIXI.Container();
 
 				const floating = [];
 				const falling = [];
@@ -74,7 +78,10 @@
 					figure.loop = false;
 					figure.play();
 
+					app.stage.addChild( back );
+					app.stage.addChild( mid );
 					app.stage.addChild( figure );
+					app.stage.addChild( front );
 
 					app.ticker.add( () => {
 						if ( keys[ "40" ] ) {
