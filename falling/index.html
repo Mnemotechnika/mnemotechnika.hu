@@ -63,14 +63,18 @@
 				var isFalling= false;
 
 				PIXI.Assets.load( 'falling.json' ).then( () => {
+
 					back.x = 0;
 					back.y = 0;
+					back.name = 'back';
 					back.width = window.innerWidth;
 					mid.x = 0;
 					mid.y = 0;
+					mid.name = 'mid';
 					mid.width = window.innerWidth;
 					front.x = 0;
 					front.y = 0;
+					front.name = 'front';
 					front.width = window.innerWidth;
 
 					for ( let i = 0; i < 45; i++)  {
@@ -82,6 +86,7 @@
 					const figure = new PIXI.AnimatedSprite( animation );
 					figure.x = app.screen.width / 2;
 					figure.y = app.screen.height / 2;
+					figure.name = 'figure';
 					figure.anchor.set( 0.5 );
 					figure.animationSpeed = animationSpeed;
 					figure.loop = false;
