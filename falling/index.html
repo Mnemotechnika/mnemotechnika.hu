@@ -79,6 +79,11 @@
 
 					for ( let i = 0; i < 45; i++)  {
 						const val = i < 10 ? `0${ i }` : i;
+						const backSprite = new PIXI.Sprite( PIXI.Texture.from( `assets/FALL-${ val }.png` ) );
+						backSprite.y = i * 480;
+						backSprite.x = 0;  
+						back.addChild( backSprite );
+						
 						falling.push( PIXI.Texture.from( `assets/FALL-${ val }.png` ) );
 						floating.push( PIXI.Texture.from( `assets/FLOAT-${ val }.png` ) );
 					}
