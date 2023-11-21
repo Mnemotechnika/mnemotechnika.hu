@@ -63,6 +63,8 @@
 				var scale = 1;
 				var scaleSpeed = 0.01;
 				var isFalling= false;
+				
+				app.stage = new PIXI.layers.Stage();
 
 				PIXI.Assets.load( 'falling.json' ).then( () => {
 
