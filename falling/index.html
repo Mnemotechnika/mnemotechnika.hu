@@ -68,17 +68,17 @@
 					back.y = 0;
 					back.name = 'back';
 					back.width = app.screen.width;
-					back.anchor.set( 0.5 );
+
 					mid.x = 0;
 					mid.y = 0;
 					mid.name = 'mid';
 					mid.width = app.screen.width;
-					mid.anchor.set( 0.5 );
+
 					front.x = 0;
 					front.y = 0;
 					front.name = 'front';
 					front.width = app.screen.width;
-					front.anchor.set( 0.5 );
+
 
 					for ( let i = 0; i < 45; i++)  {
 						const val = i < 10 ? `0${ i }` : i;
@@ -138,8 +138,13 @@
 					app.renderer.resize( window.innerWidth, window.innerHeight );
 					app.stage.children.forEach( function( item, index, object ) {
 						console.log( item )
-						item.x = app.screen.width * item.anchor.x;
-						item.y = app.screen.height * item.anchor.y;
+						if ( item.name == 'figure' ) {
+							item.x = app.screen.width * item.anchor.x;
+							item.y = app.screen.height * item.anchor.y;
+						} else {
+							item.x = app.screen.width;
+							item.y = app.screen.height;
+						}
 					});
 				});
 			}
