@@ -107,6 +107,7 @@
 				window.addEventListener( 'resize', ( event ) => {
 					app.renderer.resize( window.innerWidth, window.innerHeight );
 					app.stage.children.forEach( function( item, index, object ) {
+						console.log( item )
 						item.x = app.screen.width * item.anchor.x;
 						item.y = app.screen.height * item.anchor.y;
 					});
