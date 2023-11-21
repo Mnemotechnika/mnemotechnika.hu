@@ -1,7 +1,6 @@
 <html>
 	<head>
 		<script src="pixi-legacy.min.js"></script>
-		<script src="pixi-layers.js"></script>
 		<style>
 			* {
 				margin: 0;
@@ -50,12 +49,7 @@
 					background: 'darkred', 
 					resizeTo: window 
 				});
-				const GROUPS = {
-  					back: new PIXI.layers.Group( 0, false ),
-  					mid: new PIXI.layers.Group( 1, false ),
-					figure: new PIXI.layers.Group( 2, false ),
-					front: new PIXI.layers.Group( 3, false )
-				};
+
 				const floating = [];
 				const falling = [];
 				var animation = floating;
@@ -63,11 +57,6 @@
 				var scale = 1;
 				var scaleSpeed = 0.01;
 				var isFalling= false;
-				
-				app.stage = new PIXI.layers.Stage();
-				app.stage.sortableChildren = true;
-        		//app.stage.interactive = true;
-        		//app.stage.hitArea = app.screen;
 
 				PIXI.Assets.load( 'falling.json' ).then( () => {
 
@@ -86,12 +75,7 @@
 					figure.parentGroup = GROUPS.figure;
 					figure.play();
 
-					//app.stage.addChild( new PIXI.layers.layer( GROUPS.back ) );
-					//app.stage.addChild( new PIXI.layers.layer( GROUPS.mid ) );
-					app.stage.addChild( new PIXI.layers.layer( GROUPS.figure ) );
-					//app.stage.addChild( new PIXI.layers.layer( GROUPS.front ) );
-
-					//app.stage.addChild( anim );
+					app.stage.addChild( anim );
 
 					app.ticker.add( () => {
 						if ( keys[ "40" ] ) {
