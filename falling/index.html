@@ -1,6 +1,7 @@
 <html>
 	<head>
 		<script src="pixi-legacy.min.js"></script>
+		<script src="pixi-layers.js"></script>
 		<style>
 			* {
 				margin: 0;
@@ -50,10 +51,10 @@
 					resizeTo: window 
 				});
 				const GROUPS = {
-  					back: new PIXI.layers.Group(0, true),
-  					mid: new PIXI.layers.Group(1, true),
-					figure: new PIXI.layers.Group(2, true),
-					front: new PIXI.layers.Group(3, true)
+  					back: new PIXI.layers.Group( 0, true ),
+  					mid: new PIXI.layers.Group( 1, true ),
+					figure: new PIXI.layers.Group( 2, true ),
+					front: new PIXI.layers.Group( 3, true )
 				};
 				const floating = [];
 				const falling = [];
