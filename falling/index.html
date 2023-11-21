@@ -64,8 +64,8 @@
 
 				PIXI.Assets.load( 'falling.json' ).then( () => {
 
-					back.x = 0;
-					back.y = 0;
+					back.x = 100;
+					back.y = 100;
 					back.name = 'back';
 					back.width = app.screen.width;
 					mid.x = 0;
@@ -79,9 +79,11 @@
 
 					for ( let i = 0; i < 45; i++)  {
 						const val = i < 10 ? `0${ i }` : i;
+						
 						const backSprite = new PIXI.Sprite( PIXI.Texture.from( `assets/FALL-${ val }.png` ) );
 						backSprite.y = i * 480;
-						backSprite.x = 0;  
+						backSprite.x = 0;
+						backSprite.width = app.screen.width;
 						back.addChild( backSprite );
 						
 						falling.push( PIXI.Texture.from( `assets/FALL-${ val }.png` ) );
