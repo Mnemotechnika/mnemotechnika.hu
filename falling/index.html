@@ -65,10 +65,13 @@
 				PIXI.Assets.load( 'falling.json' ).then( () => {
 					back.x = 0;
 					back.y = 0;
+					back.width = window.innerWidth;
 					mid.x = 0;
 					mid.y = 0;
+					mid.width = window.innerWidth;
 					front.x = 0;
 					front.y = 0;
+					front.width = window.innerWidth;
 
 					for ( let i = 0; i < 45; i++)  {
 						const val = i < 10 ? `0${ i }` : i;
