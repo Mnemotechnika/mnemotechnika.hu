@@ -65,6 +65,9 @@
 				var isFalling= false;
 				
 				app.stage = new PIXI.layers.Stage();
+				app.stage.sortableChildren = true;
+        		app.stage.interactive = true;
+        		app.stage.hitArea = app.screen;
 
 				PIXI.Assets.load( 'falling.json' ).then( () => {
 
@@ -88,7 +91,7 @@
 					app.stage.addChild( new PIXI.layers.layer( GROUPS.figure ) );
 					//app.stage.addChild( new PIXI.layers.layer( GROUPS.front ) );
 
-					app.stage.addChild( anim );
+					//app.stage.addChild( anim );
 
 					app.ticker.add( () => {
 						if ( keys[ "40" ] ) {
