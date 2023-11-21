@@ -78,26 +78,26 @@
 
 					app.ticker.add( () => {
 						if ( keys[ "40" ] ) {
-							if ( !isFalling ) anim.animationSpeed = 1.2;
+							if ( !isFalling ) falling.animationSpeed = 1.2;
 							scale = 0.5;
 							animation = falling;
 							animationSpeed = 0.3;
 						}
-						if ( !anim.playing  ) {
-							anim.textures = animation;
-							isFalling = ( anim.textures == falling ) ? true : false;
+						if ( !falling.playing  ) {
+							falling.textures = animation;
+							isFalling = ( falling.textures == falling ) ? true : false;
 							if ( !isFalling ) scale = 1;
-							anim.animationSpeed = animationSpeed;
-							anim.play();
+							falling.animationSpeed = animationSpeed;
+							falling.play();
 							animation = floating;
 						}
-						if ( anim.scale.x > scale ) {
-							anim.scale.x -= scaleSpeed;
-							anim.scale.y -= scaleSpeed;
+						if ( falling.scale.x > scale ) {
+							falling.scale.x -= scaleSpeed;
+							falling.scale.y -= scaleSpeed;
 						}
-						if ( anim.scale.x < scale ) {
-							anim.scale.x += scaleSpeed;
-							anim.scale.y += scaleSpeed;
+						if ( falling.scale.x < scale ) {
+							falling.scale.x += scaleSpeed;
+							falling.scale.y += scaleSpeed;
 						}
 					});
 				}).catch( console.error );
