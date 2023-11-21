@@ -58,11 +58,11 @@
 				var scaleSpeed = 0.01;
 				var isFalling= false;
 
-				PIXI.Assets.load( 'falling.json' ).then( () => {
+				PIXI.Assets.load( 'figure.json' ).then( () => {
 
 					for ( let i = 0; i < 45; i++)  {
 						const val = i < 10 ? `0${ i }` : i;
-						falling.push( PIXI.Texture.from( `assets/FALL-${ val }.png` ) );
+						figure.push( PIXI.Texture.from( `assets/FALL-${ val }.png` ) );
 						floating.push( PIXI.Texture.from( `assets/FLOAT-${ val }.png` ) );
 					}
 
@@ -74,30 +74,30 @@
 					figure.loop = false;
 					figure.play();
 
-					app.stage.addChild( falling );
+					app.stage.addChild( figure );
 
 					app.ticker.add( () => {
 						if ( keys[ "40" ] ) {
-							if ( !isFalling ) falling.animationSpeed = 1.2;
+							if ( !isFalling ) figure.animationSpeed = 1.2;
 							scale = 0.5;
 							animation = falling;
 							animationSpeed = 0.3;
 						}
-						if ( !falling.playing  ) {
-							falling.textures = animation;
-							isFalling = ( falling.textures == falling ) ? true : false;
+						if ( !figure.playing  ) {
+							figure.textures = animation;
+							isFalling = ( figure.textures == falling ) ? true : false;
 							if ( !isFalling ) scale = 1;
-							falling.animationSpeed = animationSpeed;
-							falling.play();
+							figure.animationSpeed = animationSpeed;
+							figure.play();
 							animation = floating;
 						}
-						if ( falling.scale.x > scale ) {
-							falling.scale.x -= scaleSpeed;
-							falling.scale.y -= scaleSpeed;
+						if ( figure.scale.x > scale ) {
+							figure.scale.x -= scaleSpeed;
+							figure.scale.y -= scaleSpeed;
 						}
-						if ( falling.scale.x < scale ) {
-							falling.scale.x += scaleSpeed;
-							falling.scale.y += scaleSpeed;
+						if ( figure.scale.x < scale ) {
+							figure.scale.x += scaleSpeed;
+							figure.scale.y += scaleSpeed;
 						}
 					});
 				}).catch( console.error );
