@@ -139,9 +139,7 @@
 				async function loadScreen( place )
 {
 					const loadScreenAssets = await PIXI.Assets.loadBundle( place );
-					loadScreenAssets.forEach( function( item, index ) {
-						console.log( item )
-					})
+					console.log(loadScreenAssets)
 				}
 
 
