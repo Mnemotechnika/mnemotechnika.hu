@@ -53,24 +53,28 @@
 								name: 'ozora-stage',
 								assets: [
 									{
-										alias: 'back1',
+										alias: 'back0',
 										src: 'assets/B01.png',
+									},
+									{
+										alias: 'back1',
+										src: 'assets/B02.png',
 									},
 									{
 										alias: 'back2',
 										src: 'assets/B02.png',
 									},
 									{
-										alias: 'back3',
-										src: 'assets/B02.png',
-									},
-									{
-										alias: 'mid1',
+										alias: 'mid0',
 										src: 'assets/B01.png',
 									},
 									{
-										alias: 'mid2',
+										alias: 'mid1',
 										src: 'assets/B02.png',
+									},
+									{
+										alias: 'mid2',
+										src: 'assets/B03.png',
 									},
 									{
 										alias: 'mid3',
@@ -78,23 +82,23 @@
 									},
 									{
 										alias: 'mid4',
-										src: 'assets/B03.png',
-									},
-									{
-										alias: 'mid5',
 										src: 'assets/B05.png',
 									},
 									{
-										alias: 'mid6',
+										alias: 'mid5',
 										src: 'assets/B06.png',
 									},
 									{
-										alias: 'front1',
+										alias: 'front0',
 										src: 'assets/B01.png',
 									},
 									{
-										alias: 'front2',
+										alias: 'front1',
 										src: 'assets/B02.png',
+									},
+									{
+										alias: 'front2',
+										src: 'assets/B03.png',
 									},
 									{
 										alias: 'front3',
@@ -102,26 +106,22 @@
 									},
 									{
 										alias: 'front4',
-										src: 'assets/B03.png',
-									},
-									{
-										alias: 'front5',
 										src: 'assets/B05.png',
 									},
 									{
-										alias: 'front6',
+										alias: 'front5',
 										src: 'assets/B06.png',
 									},
 									{
-										alias: 'front7',
+										alias: 'front6',
 										src: 'assets/B07.png',
 									},
 									{
-										alias: 'front8',
+										alias: 'front7',
 										src: 'assets/B08.png',
 									},
 									{
-										alias: 'front9',
+										alias: 'front8',
 										src: 'assets/B09.png',
 									},
 								],
@@ -138,20 +138,26 @@
 				async function loadScreen( place )
 {
 					const loadScreenAssets = await PIXI.Assets.loadBundle( place );
-					for ( let i = 1; i < 4; i++ ) {
+					for ( let i = 0; i < 3; i++ ) {
 						const goNext = new PIXI.Sprite( loadScreenAssets[ 'back' + i ] );
+						goNext.x = i * app.screen.width
+						goNext.y = 0;
 						goNext.width = app.screen.width;
 						goNext.heigt = app.screen.width;
 						back.addChild( goNext );
 					}
 					for ( let i = 1; i < 7; i++ ) {
 						const goNext = new PIXI.Sprite( loadScreenAssets[ 'mid' + i ] );
+						goNext.x = i * app.screen.width
+						goNext.y = 0;						
 						goNext.width = app.screen.width;
 						goNext.heigt = app.screen.width;
 						mid.addChild( goNext );
 					}
 					for ( let i = 1; i < 10; i++ ) {
 						const goNext = new PIXI.Sprite( loadScreenAssets[ 'front' + i ] );
+						goNext.x = i * app.screen.width
+						goNext.y = 0;
 						goNext.width = app.screen.width;
 						goNext.heigt = app.screen.width;
 						front.addChild( goNext );
@@ -196,14 +202,7 @@
 					front.width = app.screen.width;
 
 					for ( let i = 0; i < 45; i++)  {
-						const val = i < 10 ? `0${ i }` : i;
-						
-						const backSprite = new PIXI.Sprite( PIXI.Texture.from( `assets/FALL-${ val }.png` ) );
-						backSprite.y = i * 480;
-						backSprite.x = 0;
-						backSprite.width = app.screen.width;
-						back.addChild( backSprite );
-						
+						const val = i < 10 ? `0${ i }` : i;						
 						falling.push( PIXI.Texture.from( `assets/FALL-${ val }.png` ) );
 						floating.push( PIXI.Texture.from( `assets/FLOAT-${ val }.png` ) );
 					}
