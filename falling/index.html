@@ -159,9 +159,8 @@
 
 				}
 
-				init();
-				loadScreen( 'ozora-stage' );
-				
+
+
 				const app = new PIXI.Application({ 
 					background: 'darkred', 
 					resizeTo: window 
@@ -195,7 +194,6 @@
 					front.y = 0;
 					front.name = 'front';
 					front.width = app.screen.width;
-
 
 					for ( let i = 0; i < 45; i++)  {
 						const val = i < 10 ? `0${ i }` : i;
@@ -252,6 +250,10 @@ console.log( back.height );
 				}).catch( console.error );
 
 				document.body.appendChild( app.view );
+
+				init();
+				loadScreen( 'ozora-stage' );
+
 				window.addEventListener( 'resize', ( event ) => {
 					app.renderer.resize( window.innerWidth, window.innerHeight );
 					app.stage.children.forEach( function( item, index, object ) {
