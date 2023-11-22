@@ -135,7 +135,29 @@
 					]);
 				}
 				
+				async function loadScreen( place )
+{
+					const loadScreenAssets = await PIXI.Assets.loadBundle( place );
+					for ( let i = 1; i < 4; i++ ) {
+						const goNext = new PIXI.Sprite( loadScreenAssets[ 'back' + i ] );
+						goNext.width = app.screen.width;
+						goNext.heigt = app.screen.width;
+						back.addChild( goNext );
+					}
+					for ( let i = 1; i < 7; i++ ) {
+						const goNext = new PIXI.Sprite( loadScreenAssets[ 'mid' + i ] );
+						goNext.width = app.screen.width;
+						goNext.heigt = app.screen.width;
+						mid.addChild( goNext );
+					}
+					for ( let i = 1; i < 10; i++ ) {
+						const goNext = new PIXI.Sprite( loadScreenAssets[ 'front' + i ] );
+						goNext.width = app.screen.width;
+						goNext.heigt = app.screen.width;
+						front.addChild( goNext );
+					}
 
+				}
 
 
 				init();
