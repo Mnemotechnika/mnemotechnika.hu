@@ -18,7 +18,6 @@
 	</head>
 	<body>
 		<script>
-				
 			var keys = {};
 			window.addEventListener( "keydown", evemt => {
 				keys[ event.keyCode ] = true;
@@ -53,9 +52,7 @@
 			document.body.appendChild( app.view );
 
 			async function init() {
-				
 				await PIXI.Assets.init({ manifest: places });
-				
 				PIXI.Assets.backgroundLoadBundle([
 					'falling',
 					'floating',
@@ -71,15 +68,12 @@
 			var midOffset = 0;
 			var frontOffset = 0;	
 			async function loadScreen( place, init = false ) {
-
 				backOffset = back.height;
 				midOffset = mid.height;
 				frontOffset = front.height;
 
 				const loadScreenAssets = await PIXI.Assets.loadBundle( place );
-				
 				Object.entries( loadScreenAssets ).forEach( ( [ key, value ], index) => {
-					
 					const tex = new PIXI.Sprite( loadScreenAssets[ key ] );
 					
 					if ( app.screen.width > 960 /*tex.width*/ ) {
@@ -102,12 +96,12 @@
 						front.addChild( tex );
 					}
 				});
-				if ( !init ) {
-					if ( !isFalling ) figure.animationSpeed = 1.2;
-						//scale = 1.2;
-						animation = falling;
-						animationSpeed = 0.3;
-				} else loadAnimation();
+
+				if ( init ) loadAnimation();
+				if ( !isFalling ) figure.animationSpeed = 1.2;
+					//scale = 1.2;
+					animation = falling;
+					animationSpeed = 0.3;
 			}
 			async function loadAnimation() {
 				const fallingBundle = await PIXI.Assets.loadBundle( 'falling' );
@@ -121,39 +115,37 @@
 				});
 			}
 
-			const back = new PIXI.Container();
-			back.name = 'back';
-			const mid = new PIXI.Container();
-			mid.name = 'mid';
-			const front = new PIXI.Container();
-			front.name = 'front';
-
 			const floating = [];
 			const falling = [];
-			var animation = falling;
-			var animationSpeed = 0.3;
-			var scale = 1.2;
-			var scaleSpeed = 0.03;
-			var moveSpeed = 10;
-			var pos = { 
+			const scale = 1.2;
+			const pos = { 
 				x: app.screen.width / 2,
 				y: app.screen.height / 2
 			}
-			var isFalling= true;
+
+			var animation = falling;
+			var animationSpeed = 0.3;
+			var scaleSpeed = 0.03;
+			var moveSpeed = 10;
+			var isFalling = true;
 			var repeat = true;
 			var figure;
 
-			back.x = 0;
-			back.y = app.screen.height;
-			back.width = app.screen.width;
-
-			mid.x = 0;
-			mid.y = app.screen.height;
-			mid.width = app.screen.width;
-
-			front.x = 0;
-			front.y = app.screen.height;
-			front.width = app.screen.width;
+			const back = new PIXI.Container();
+				back.name = 'back';
+				back.x = 0;
+				back.y = app.screen.height;
+				back.width = app.screen.width;
+			const mid = new PIXI.Container();
+				mid.name = 'mid';
+				mid.x = 0;
+				mid.y = app.screen.height;
+				mid.width = app.screen.width;
+			const front = new PIXI.Container();
+				front.name = 'front';
+				front.x = 0;
+				front.y = app.screen.height;
+				front.width = app.screen.width;
 
 			function startAnimation() {
 				figure = new PIXI.AnimatedSprite( animation );
@@ -222,7 +214,6 @@
 						back.y = ( -2 * offset ) + ( app.screen.height - backOffset );
 						mid.y = ( -3 * offset ) + ( app.screen.height - midOffset );
 						front.y = ( -5 * offset ) + ( app.screen.height - frontOffset );
-
 					}
 					
 					if ( figure.scale.x > scale ) {
