@@ -1,6 +1,7 @@
 <html>
 	<head>
 		<script src="pixi-legacy.min.js"></script>
+		<script src="falling.js"></script>
 		<style>
 			* {
 				margin: 0;
@@ -8,7 +9,7 @@
 				overflow: hidden;
 			}
 			html {
-				background-color:  darkred;
+				background-color: black;
 			}
 			html:not(:hover), body:not(:hover){
     			background-color: black;
@@ -17,231 +18,248 @@
 	</head>
 	<body>
 		<script>
-			window.onload = function() {
 				
-				var keys = {};
-				window.addEventListener( "keydown", evemt => {
-					keys[ event.keyCode ] = true;
-				});
-				window.addEventListener( "keyup", event => {
-					keys[ event.keyCode ] = false;
-				});
+			var keys = {};
+			window.addEventListener( "keydown", evemt => {
+				keys[ event.keyCode ] = true;
+			});
+			window.addEventListener( "keyup", event => {
+				keys[ event.keyCode ] = false;
+			});
 
-				function handleOrientation( event ) {
-					scale = 2 - Math.round( event.beta || 0 ) / 100;
+			function handleOrientation( event ) {
+				scale = 2 - Math.round( event.beta || 0 ) / 100;
+			}
+			function handleMove( event ) {
+				scale = 2- Math.round( event.clientX - ( window.innerWidth / 2 ) ) / 100;
+			}
+			function devOr() {
+				if ( typeof DeviceOrientationEvent === 'function' ) { 
+					if ( typeof DeviceOrientationEvent.requestPermission === 'function' ) {
+						DeviceOrientationEvent.requestPermission().then( response => {
+							if ( response == 'granted' ) window.addEventListener( 'deviceorientation', handleOrientation )
+						}).catch( console.error )
+					} else window.addEventListener( 'deviceorientation', handleOrientation );
 				}
-				function handleMove( event ) {
-					scale = 2- Math.round( event.clientX - ( window.innerWidth / 2 ) ) / 100;
-				}
-				function devOr() {
-					if ( typeof DeviceOrientationEvent === 'function' ) { 
-						if ( typeof DeviceOrientationEvent.requestPermission === 'function' ) {
-							DeviceOrientationEvent.requestPermission().then( response => {
-								if ( response == 'granted' ) window.addEventListener( 'deviceorientation', handleOrientation )
-							}).catch( console.error )
-						} else window.addEventListener( 'deviceorientation', handleOrientation );
+			}
+			//window.addEventListener( 'mousemove', handleMove );
+			//devOr();
+
+			const app = new PIXI.Application({ 
+				background: 'black', 
+				resizeTo: window 
+			});
+
+			document.body.appendChild( app.view );
+
+			async function init() {
+				
+				await PIXI.Assets.init({ manifest: places });
+				
+				PIXI.Assets.backgroundLoadBundle([
+					'falling',
+					'floating',
+					'ozora-satage', 
+					'ambyss', 
+					'dragon-nest', 
+					'the-dome'
+				]);
+
+				loadScreen( 'ozora-stage', true );
+			}
+			var backOffset = 0;
+			var midOffset = 0;
+			var frontOffset = 0;	
+			async function loadScreen( place, init = false ) {
+
+				backOffset = back.height;
+				midOffset = mid.height;
+				frontOffset = front.height;
+
+				const loadScreenAssets = await PIXI.Assets.loadBundle( place );
+				
+				Object.entries( loadScreenAssets ).forEach( ( [ key, value ], index) => {
+					
+					const tex = new PIXI.Sprite( loadScreenAssets[ key ] );
+					
+					if ( app.screen.width > 960 /*tex.width*/ ) {
+						tex.width = app.screen.width;
+						tex.x = 0;
+					} else tex.x = 0 - ( ( tex.width - app.screen.width ) / 2 );
+
+					tex.height = tex.width;
+
+					if ( key.includes( 'back' ) ) {
+						tex.y = back.height;
+						back.addChild( tex );
 					}
-				}
-				//window.addEventListener( 'mousemove', handleMove );
-				//devOr();
-
-
-				async function init() {
-					// manifest example
-					const manifest = {
-						bundles: [
-							{
-								name: 'ozora-stage',
-								assets: [
-									{
-										name: 'back0',
-										srcs: 'assets/B01.png',
-									},
-									{
-										name: 'back1',
-										srcs: 'assets/B02.png',
-									},
-									{
-										name: 'back2',
-										srcs: 'assets/B02.png',
-									},
-									{
-										name: 'mid0',
-										srcs: 'assets/B01.png',
-									},
-									{
-										name: 'mid1',
-										srcs: 'assets/B02.png',
-									},
-									{
-										name: 'mid2',
-										srcs: 'assets/B03.png',
-									},
-									{
-										name: 'mid3',
-										srcs: 'assets/B03.png',
-									},
-									{
-										name: 'mid4',
-										srcs: 'assets/B05.png',
-									},
-									{
-										name: 'mid5',
-										srcs: 'assets/B06.png',
-									},
-									{
-										name: 'front0',
-										srcs: 'assets/B01.png',
-									},
-									{
-										name: 'front1',
-										srcs: 'assets/B02.png',
-									},
-									{
-										name: 'front2',
-										srcs: 'assets/B03.png',
-									},
-									{
-										name: 'front3',
-										srcs: 'assets/B03.png',
-									},
-									{
-										name: 'front4',
-										srcs: 'assets/B05.png',
-									},
-									{
-										name: 'front5',
-										srcs: 'assets/B06.png',
-									},
-									{
-										name: 'front6',
-										srcs: 'assets/B07.png',
-									},
-									{
-										name: 'front7',
-										srcs: 'assets/B08.png',
-									},
-									{
-										name: 'front8',
-										srcs: 'assets/B09.png',
-									},
-								],
-							},
-						]
-					};
-
-					await PIXI.Assets.init({ manifest });
-					PIXI.Assets.backgroundLoadBundle([
-						'ozora-satage'
-					]);
-				}
-				
-				async function loadScreen( place ) {
-					console.log( place );
-					const loadScreenAssets = await PIXI.Assets.loadBundle( place );
-					console.log( loadScreenAssets );
-				}
-
-
-
-				const app = new PIXI.Application({ 
-					background: 'darkred', 
-					resizeTo: window 
-				});
-				
-				const back = new PIXI.Container();
-				const mid = new PIXI.Container();
-				const front = new PIXI.Container();
-
-				const floating = [];
-				const falling = [];
-				var animation = floating;
-				var animationSpeed = 0.3;
-				var scale = 1;
-				var scaleSpeed = 0.01;
-				var isFalling= false;
-
-				PIXI.Assets.load( 'falling.json' ).then( () => {
-
-					back.x = 0;
-					back.y = 0;
-					back.name = 'back';
-					back.width = app.screen.width;
-
-					mid.x = 0;
-					mid.y = 0;
-					mid.name = 'mid';
-					mid.width = app.screen.width;
-
-					front.x = 0;
-					front.y = 0;
-					front.name = 'front';
-					front.width = app.screen.width;
-
-					for ( let i = 0; i < 45; i++)  {
-						const val = i < 10 ? `0${ i }` : i;						
-						falling.push( PIXI.Texture.from( `assets/FALL-${ val }.png` ) );
-						floating.push( PIXI.Texture.from( `assets/FLOAT-${ val }.png` ) );
+					if ( key.includes( 'mid' ) ) {
+						tex.y = mid.height;
+						mid.addChild( tex );
 					}
-
-					const figure = new PIXI.AnimatedSprite( animation );
-					figure.x = app.screen.width / 2;
-					figure.y = app.screen.height / 2;
-					figure.name = 'figure';
-					figure.anchor.set( 0.5 );
-					figure.animationSpeed = animationSpeed;
-					figure.loop = false;
-					figure.play();
-
-					app.stage.addChild( back );
-					app.stage.addChild( mid );
-					app.stage.addChild( figure );
-					app.stage.addChild( front );
-
-					app.ticker.add( () => {
-						if ( keys[ "40" ] ) {
-							if ( !isFalling ) figure.animationSpeed = 1.2;
-							scale = 0.5;
-							animation = falling;
-							animationSpeed = 0.3;
-console.log( back.height );
-						}
-						if ( !figure.playing  ) {
-							figure.textures = animation;
-							isFalling = ( figure.textures == falling ) ? true : false;
-							if ( !isFalling ) scale = 1;
-							figure.animationSpeed = animationSpeed;
-							figure.play();
-							animation = floating;
-						}
-						if ( figure.scale.x > scale ) {
-							figure.scale.x -= scaleSpeed;
-							figure.scale.y -= scaleSpeed;
-						}
-						if ( figure.scale.x < scale ) {
-							figure.scale.x += scaleSpeed;
-							figure.scale.y += scaleSpeed;
-						}
-					});
-				}).catch( console.error );
-
-				document.body.appendChild( app.view );
-
-				init();
-				loadScreen( 'ozora-stage' );
-
-				window.addEventListener( 'resize', ( event ) => {
-					app.renderer.resize( window.innerWidth, window.innerHeight );
-					app.stage.children.forEach( function( item, index, object ) {
-						if ( item.name == 'figure' ) {
-							item.x = app.screen.width * item.anchor.x;
-							item.y = app.screen.height * item.anchor.y;
-						} else {
-							item.y += 10;
-						}
-					});
+					if ( key.includes( 'front' ) ) {
+						tex.y = front.height;
+						front.addChild( tex );
+					}
+				});
+				if ( !init ) {
+					if ( !isFalling ) figure.animationSpeed = 1.2;
+						//scale = 1.2;
+						animation = falling;
+						animationSpeed = 0.3;
+				} else loadAnimation();
+			}
+			async function loadAnimation() {
+				const fallingBundle = await PIXI.Assets.loadBundle( 'falling' );
+				Object.entries( fallingBundle ).forEach( ( [ key, value ], index) => {
+					falling.push( fallingBundle [ key ] );
+				});
+				startAnimation();
+				const floatingBundle = await PIXI.Assets.loadBundle( 'floating' );
+				Object.entries( floatingBundle ).forEach( ( [ key, value ], index) => {
+					floating.push( floatingBundle [ key ] );
 				});
 			}
+
+			const back = new PIXI.Container();
+			back.name = 'back';
+			const mid = new PIXI.Container();
+			mid.name = 'mid';
+			const front = new PIXI.Container();
+			front.name = 'front';
+
+			const floating = [];
+			const falling = [];
+			var animation = falling;
+			var animationSpeed = 0.3;
+			var scale = 1.2;
+			var scaleSpeed = 0.03;
+			var moveSpeed = 10;
+			var pos = { 
+				x: app.screen.width / 2,
+				y: app.screen.height / 2
+			}
+			var isFalling= true;
+			var repeat = true;
+			var figure;
+
+			back.x = 0;
+			back.y = app.screen.height;
+			back.width = app.screen.width;
+
+			mid.x = 0;
+			mid.y = app.screen.height;
+			mid.width = app.screen.width;
+
+			front.x = 0;
+			front.y = app.screen.height;
+			front.width = app.screen.width;
+
+			function startAnimation() {
+				figure = new PIXI.AnimatedSprite( animation );
+				figure.name = 'figure';
+				figure.x = app.screen.width / 2;
+				figure.y = -app.screen.height / 2;
+				figure.scale.x = scale;
+				figure.scale.y = scale;
+				figure.anchor.set( 0.5 );
+				figure.animationSpeed = animationSpeed;
+				figure.loop = false;
+
+				app.stage.addChild( back );
+				app.stage.addChild( mid );
+				app.stage.addChild( figure );
+				app.stage.addChild( front );
+
+				var lastFrame = 0;
+				var difFrame = 0
+				var offset = 0;
+				var subOffset = 0;
+
+				app.ticker.add( () => {
+					if ( keys[ "38" ] ) {
+						back.y += 2;
+						mid.y += 3;
+						front.y += 5;
+						console.log( app.screen.height, back.height, back.y )
+					}
+					if ( keys[ "40" ] ) {
+						back.y -= 2;
+						mid.y -= 3;
+						front.y -= 5;
+						console.log( app.screen.height, back.height, back.y )
+					}
+					if ( keys[ "49" ] ) {
+						if ( !isFalling && !repeat ) loadScreen( 'ambyss' );
+						repeat = true;
+					}
+					if ( keys[ "50" ] ) {
+						if ( !isFalling  && !repeat ) loadScreen( 'dragon-nest' );
+						repeat = true;
+					}
+					if ( keys[ "51" ] ) {
+						if ( !isFalling  && !repeat ) loadScreen( 'ozora-stage' );
+						repeat = true;
+					}
+					if ( keys[ "52" ] ) {
+						if ( !isFalling && !repeat ) loadScreen( 'the-dome' );
+						repeat = true;
+					}
+
+					if ( !figure.playing  ) {
+						figure.textures = animation;
+						isFalling = ( figure.textures == falling ) ? true : false;
+						figure.animationSpeed = animationSpeed;
+						figure.play();
+						animation = floating;
+					}
+					if ( isFalling ) {
+						repeat = false;
+						if ( lastFrame != figure._previousFrame ) {
+							lastFrame = figure._previousFrame;
+						}
+						offset = ( back.width / 45 ) * ( figure._previousFrame + 1 );
+						back.y = ( -2 * offset ) + ( app.screen.height - backOffset );
+						mid.y = ( -3 * offset ) + ( app.screen.height - midOffset );
+						front.y = ( -5 * offset ) + ( app.screen.height - frontOffset );
+
+					}
+					
+					if ( figure.scale.x > scale ) {
+						figure.scale.x -= scaleSpeed;
+						figure.scale.y -= scaleSpeed;
+					}
+					if ( figure.scale.x < scale ) {
+						figure.scale.x += scaleSpeed;
+						figure.scale.y += scaleSpeed;
+					}
+					if ( figure.x > pos.x ) figure.x -= moveSpeed;
+					if ( figure.x < pos.x ) figure.x += moveSpeed;
+					if ( figure.y > pos.y ) figure.y -= moveSpeed;
+					if ( figure.y < pos.y ) figure.y += moveSpeed;
+				});
+			}
+
+			init();
+			
+			window.addEventListener( 'resize', ( event ) => {
+				app.renderer.resize( window.innerWidth, window.innerHeight );
+				app.stage.children.forEach( function( item, index, object ) {
+					if ( item.name == 'figure' ) {
+						item.x = app.screen.width * item.anchor.x;
+						item.y = app.screen.height * item.anchor.y;
+					}
+					item.children.forEach( function( item, index, object ) {
+						if ( app.screen.width > 960 /*item.width*/ ) {
+							item.width = app.screen.width;
+							item.x = 0;
+						} else item.x = 0 - ( ( item.width - app.screen.width ) / 2 );
+						item.height = item.width;
+						item.y = item.height * index;
+					});
+				});
+				pos.x = app.screen.width / 2;
+			});
 		</script>
-	</head>
+	</body>
 </html>
