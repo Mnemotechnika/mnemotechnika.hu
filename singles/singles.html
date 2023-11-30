@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="de">
+	<head>
+		<title>numaek WebAudio Player 2.0 - Singles</title>
+
+		<META NAME="language"            CONTENT="de">
+		<META NAME="Description"         CONTENT="Audio Player, numaek.de PHP & Javascript, Scripte & Anwendungen. CMS, Homepage-Erstellung für Privat- und Firmenkunden.">
+		<META NAME="Keywords"            CONTENT="Web, Audio, API, Player, Canvas, Javascript">
+		<META NAME="Copyright"           CONTENT="Copyright: numaek Webprogrammierung">
+		<META NAME="Public"              CONTENT="all">
+		<META NAME="Rating"              CONTENT="all">
+		<META NAME="audience"            CONTENT="all">
+		<META NAME="expires"             CONTENT="never">
+		<META NAME="Author"              CONTENT="numaek Webprogrammierung">
+		<META NAME="publisher"           CONTENT="numaek Webprogrammierung">
+		<META NAME="robots"              CONTENT="noindex,nofollow">
+		<META NAME="revisit-after"       CONTENT="7 days">
+		<META HTTP-EQUIV="cache-control" content="no-cache">
+		<META HTTP-EQUIV="pragma"        content="no-cache">
+	</head>
+ <body style="background-color: #303030; color: #EFEFEF;">
+
+	<h2>numaek WebAudio Player 2.0 - Singles</h2>
+
+	<audio id="audio1" src="nPlayer_1.mp3" preload controls></audio>
+
+	<br><br>
+
+	<input type="button" value="Play / Pause" onclick="nWebAudio_play();">
+
+	<br><br>
+
+	<script type="text/javascript" src="nWebAudioRouting.js" ></script>
+
+	<script language="javascript">
+
+
+		/* 
+		 * WebAudio Player Singles (ausgelagerte Einzelfunktionen)
+		 * -------------------------------------------------------
+		 * 
+		 * Script:        nSingles
+		 * 
+		 * Version:       1.0
+		 * Release:       01.11.2019
+		 * 
+		 * Author:        numaek   
+		 * Copyright (c): 2004-2019 by www.numaek.de
+		 * 
+		 * 
+		 * Hinweis:
+		 * ########
+		 * 
+		 * Alle Komponenten können, so wie weiter unten, einzeln verwendet werden.
+		 * Die gemeinsame Datei "nWebAudioRouting.js" muss immer einmal eingebunden werden.
+		 * 
+		 * 
+		 * *************************************************************************************************************************************************************************************************
+		 */
+
+
+		// Starten und Stoppen des Players
+		// *******************************
+		function nWebAudio_play()
+		{
+			if( nWebAudio['routing']['ok'] == 1 )
+			{
+				if( nWebAudio['routing']['audioElement'].paused == true )
+				{
+					// Autostart nicht möglich, "Benutzer-Geste" erforderlich (hier durch Button-Klick)!
+					audioCtx.resume();
+					nWebAudio['routing']['audioElement'].play();
+				} else
+				  {
+					nWebAudio['routing']['audioElement'].pause();
+				  }
+			} else
+			  {
+				alert('Es ist ein Routing-Fehler aufgetreten!');
+			  }
+		}
+
+		// Gemeinsame Funktion: Durchschnittswert eines Array ermitteln
+		// ************************************************************
+		Math.avg = function()
+		{
+			retVal = 0;
+
+			if( arguments.length == 1 )
+			{
+				if( typeof(arguments[0]) == 'array' || typeof(arguments[0]) == 'object' )
+				{
+					if( arguments[0].length > 0 )
+					{
+						for( a = 0; a < arguments[0].length; a++ )
+						{
+							retVal += parseInt( arguments[0][a], 10 );
+						}
+
+						retVal = retVal / arguments[0].length;
+					}
+				}
+			}
+
+			return retVal;
+		}
+
+	</script>
+
+
+	<!-- Einbindung Frequenzspektrum -->
+
+		<script type="text/javascript" src="nWebAudioFrequenz.js"></script>
+
+		<canvas id="nWebAudioCanvasFreq" width="250" height="100" onclick="nWebAudio_freqViewMode();" title="Klicken zum Umschalten des Anzeigemodus" style="overflow: hidden; background-color: #000000; border: 2px solid #303030; border-radius: 5px; cursor: pointer;"></canvas>
+		<br><br>
+
+
+	<!-- Einbindung Oszilloskop -->
+
+		<script type="text/javascript" src="nWebAudioOsz.js"></script>
+
+		<canvas id="nWebAudioCanvasOsz" width="250" height="100" style="overflow: hidden; background-color: #000000; border: 2px solid #303030; border-radius: 5px;"></canvas>
+		<br><br>
+
+
+	<!-- Einbindung VU-Meter digital ( Das digitale immer vor dem analogen einbinden! ) -->
+
+		<script type="text/javascript" src="nWebAudioVuD.js"></script>
+
+		<canvas id="nWebAudioCanvasVuD" width="170" height="60" style="border: 0px solid #808080;"></canvas>
+		<br><br>
+
+
+	<!-- Einbindung VU-Meter analog -->
+
+		<script type="text/javascript" src="nWebAudioVuA.js"></script>
+
+		<canvas id="nWebAudioCanvasVuA"  width="125" height="80" style="border: inset 2px #808080;"></canvas>
+		<br><br>
+
+
+	<!-- Einbindung Wellenform -->
+
+		<script type="text/javascript" src="nWebAudioWave.js"></script>
+
+		<canvas id="nWebAudioCanvasWave" width="350" height="50" title="Sprung zu dieser Position" style="border: 0px; cursor: pointer;"></canvas>
+		<br><br>
+
+
+	<a href="http://www.numaek.de" target="_blank" style="color: #00FFFF;">www.numaek.de</a>
+	<br><br>
+
+ </body>
+</html>
