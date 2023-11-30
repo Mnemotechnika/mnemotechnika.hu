@@ -410,38 +410,208 @@ const places = {
                 srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-THEDOME-05.png',
             }]
         }, {
-        name: 'rgb',
+        name: 'pumpui',
         background: 'black',
         assets: [{
-                name: 'rgb-back0',
-                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/R.png',
+                name: 'pumpui-back0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/A-PUMPUI-01.png',
             }, {
-                name: 'rgb-back1',
-                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/R.png',
+                name: 'pumpui-back1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/A-PUMPUI-02.png',
             }, {
-                name: 'rgb-mid0',
-                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/G.png',
+                name: 'pumpui-mid0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-PUMPUI-01.png',
             }, {
-                name: 'rgb-mid1',
-                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/G.png',
+                name: 'pumpui-mid1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-PUMPUI-02.png',
             }, {
-                name: 'rgb-mid2',
-                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/G.png',
+                name: 'pumpui-mid2',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-PUMPUI-03.png',
             }, {
-                name: 'rgb-front0',
-                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B.png',
+                name: 'pumpui-front0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-PUMPUI-01.png',
             }, {
-                name: 'rgb-front1',
-                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B.png',
+                name: 'pumpui-front1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-PUMPUI-02.png',
             }, {
-                name: 'rgb-front2',
-                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B.png',
+                name: 'pumpui-front2',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-PUMPUI-03.png',
             }, {
-                name: 'rgb-front3',
-                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B.png',
+                name: 'pumpui-front3',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-PUMPUI-04.png',
             }, {
-                name: 'rgb-front4',
-                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B.png',
+                name: 'pumpui-front4',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-PUMPUI-05.png',
+            }]
+        }, {
+        name: 'cooking-groove',
+        background: 'black',
+        assets: [{
+                name: 'cooking-groove-back0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/A-COOKINGGROOVE-01.png',
+            }, {
+                name: 'cooking-groove-back1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/A-COOKINGGROOVE-02.png',
+            }, {
+                name: 'cooking-groove-mid0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-COOKINGGROOVE-01.png',
+            }, {
+                name: 'cooking-groove-mid1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-COOKINGGROOVE-02.png',
+            }, {
+                name: 'cooking-groove-mid2',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-COOKINGGROOVE-03.png',
+            }, {
+                name: 'cooking-groove-front0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-COOKINGGROOVE-01.png',
+            }, {
+                name: 'cooking-groove-front1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-COOKINGGROOVE-02.png',
+            }, {
+                name: 'cooking-groove-front2',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-COOKINGGROOVE-03.png',
+            }, {
+                name: 'cooking-groove-front3',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-COOKINGGROOVE-04.png',
+            }, {
+                name: 'cooking-groove-front4',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-COOKINGGROOVE-05.png',
+            }]
+        }, {
+        name: 'circus',
+        background: 'black',
+        assets: [{
+                name: 'circus-back0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/A-CIRCUS-01.png',
+            }, {
+                name: 'circus-back1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/A-CIRCUS-02.png',
+            }, {
+                name: 'circus-mid0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-CIRCUS-01.png',
+            }, {
+                name: 'circus-mid1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-CIRCUS-02.png',
+            }, {
+                name: 'circus-mid2',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-CIRCUS-03.png',
+            }, {
+                name: 'circus-front0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-CIRCUS-01.png',
+            }, {
+                name: 'circus-front1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-CIRCUS-02.png',
+            }, {
+                name: 'circus-front2',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-CIRCUS-03.png',
+            }, {
+                name: 'circus-front3',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-CIRCUS-04.png',
+            }, {
+                name: 'circus-front4',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-CIRCUS-05.png',
+            }]
+        }, {
+        name: 'artibarn',
+        background: 'black',
+        assets: [{
+                name: 'artibarn-back0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/A-ARTIBARN-01.png',
+            }, {
+                name: 'artibarn-back1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/A-ARTIBARN-02.png',
+            }, {
+                name: 'artibarn-mid0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-ARTIBARN-01.png',
+            }, {
+                name: 'artibarn-mid1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-ARTIBARN-02.png',
+            }, {
+                name: 'artibarn-mid2',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-ARTIBARN-03.png',
+            }, {
+                name: 'artibarn-front0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-ARTIBARN-01.png',
+            }, {
+                name: 'artibarn-front1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-ARTIBARN-02.png',
+            }, {
+                name: 'artibarn-front2',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-ARTIBARN-03.png',
+            }, {
+                name: 'artibarn-front3',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-ARTIBARN-04.png',
+            }, {
+                name: 'artibarn-front4',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-ARTIBARN-05.png',
+            }]
+        }, {
+        name: 'mirador',
+        background: 'black',
+        assets: [{
+                name: 'mirador-back0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/A-MIRADOR-01.png',
+            }, {
+                name: 'mirador-back1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/A-MIRADOR-02.png',
+            }, {
+                name: 'mirador-mid0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-MIRADOR-01.png',
+            }, {
+                name: 'mirador-mid1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-MIRADOR-02.png',
+            }, {
+                name: 'mirador-mid2',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-MIRADOR-03.png',
+            }, {
+                name: 'mirador-front0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-MIRADOR-01.png',
+            }, {
+                name: 'mirador-front1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-MIRADOR-02.png',
+            }, {
+                name: 'mirador-front2',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-MIRADOR-03.png',
+            }, {
+                name: 'mirador-front3',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-MIRADOR-04.png',
+            }, {
+                name: 'mirador-front4',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-MIRADOR-05.png',
+            }]
+        }, {
+        name: 'chambok-house',
+        background: 'black',
+        assets: [{
+                name: 'chambok-house-back0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/A-CHAMBOKHOUSE-01.png',
+            }, {
+                name: 'chambok-house-back1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/A-CHAMBOKHOUSE-02.png',
+            }, {
+                name: 'chambok-house-mid0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-CHAMBOKHOUSE-01.png',
+            }, {
+                name: 'chambok-house-mid1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-CHAMBOKHOUSE-02.png',
+            }, {
+                name: 'chambok-house-mid2',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-CHAMBOKHOUSE-03.png',
+            }, {
+                name: 'chambok-house-front0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-CHAMBOKHOUSE-01.png',
+            }, {
+                name: 'chambok-house-front1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-CHAMBOKHOUSE-02.png',
+            }, {
+                name: 'chambok-house-front2',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-CHAMBOKHOUSE-03.png',
+            }, {
+                name: 'chambok-house-front3',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-CHAMBOKHOUSE-04.png',
+            }, {
+                name: 'chambok-house-front4',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-CHAMBOKHOUSE-05.png',
             }]
         }]
     };
