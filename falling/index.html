@@ -59,7 +59,12 @@
 					'ozora-satage', 
 					'ambyss', 
 					'dragon-nest', 
-					'the-dome'
+					'the-dome',
+					'about-our-gathering',
+					'mirador',
+					'pumpui',
+					'cooking-groove',
+					'artibarn'
 				]);
 
 				loadScreen( 'ozora-stage', true );
@@ -211,6 +216,10 @@
 					}
 					if ( keys[ "56" ] ) {
 						if ( !isFalling && !repeat ) loadScreen( 'artibarn' );
+						repeat = true;
+					}
+					if ( keys[ "57" ] ) {
+						if ( !isFalling && !repeat ) loadScreen( 'about-our-gathering' );
 						repeat = true;
 					}
 

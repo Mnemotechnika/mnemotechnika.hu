@@ -277,39 +277,39 @@ const places = {
                 srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/FALL-44.png',
             },]
         }, {
-        name: 'ambyss',
+        name: 'about-our-garhering',
         assets: [{
-                name: 'ambyss-back0',
-                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/A-AMBYSS-01.png',
+                name: 'about-our-garhering-back0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/A-DATA3-01.png',
             }, {
-                name: 'ambyss-back1',
-                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/A-AMBYSS-02.png',
+                name: 'about-our-garhering-back1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/A-DATA3-02.png',
             }, {
-                name: 'ambyss-mid0',
-                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-AMBYSS-01.png',
+                name: 'about-our-garhering-mid0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-DATA3-01.png',
             }, {
-                name: 'ambyss-mid1',
-                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-AMBYSS-02.png',
+                name: 'about-our-garhering-mid1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-DATA3-02.png',
             }, {
-                name: 'ambyss-mid2',
-                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-AMBYSS-03.png',
+                name: 'about-our-garhering-mid2',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/B-DATA3-03.png',
             }, {
-                name: 'ambyss-front0',
-                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-AMBYSS-01.png',
+                name: 'about-our-garhering-front0',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-DATA3-01.png',
             }, {
-                name: 'ambyss-front1',
-                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-AMBYSS-02.png',
+                name: 'about-our-garhering-front1',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-DATA3-02.png',
             }, {
-                name: 'ambyss-front2',
-                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-AMBYSS-03.png',
+                name: 'about-our-garhering-front2',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-DATA3-03.png',
             }, {
-                name: 'ambyss-front3',
-                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-AMBYSS-04.png',
+                name: 'about-our-garhering-front3',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-DATA3-04.png',
             }, {
-                name: 'ambyss-front4',
-                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-AMBYSS-05.png',
+                name: 'about-our-garhering-front4',
+                srcs: 'https://ozora-spaces.fra1.digitaloceanspaces.com/falling/C-DATA3-05.png',
             }]
-        },{
+        }, {
         name: 'dragon-nest',
         assets: [{
                 name: 'dragon-nest-back0',
