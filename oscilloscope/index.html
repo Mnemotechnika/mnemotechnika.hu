@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Oscilloscope</title>
+        <style type="text/css">
+            .visualizer {
+                display: block;
+                width: 100%;
+                height: auto;
+            }
+            audio {
+                display: block;
+                width: 100%;
+                margin: 10px;
+            }
+        </style>
+    </head>
+    <body>
+
+        <canvas class="visualizer" width="1280" height="720"></canvas>
+
+        <script type="text/javascript" src="bower_components/dat-gui/build/dat.gui.min.js"></script>
+        <script type="text/javascript" src="bower_components/stats.js/build/stats.min.js"></script>
+        <script>
+        (function () {
+
+            var stats = new Stats();
+            stats.setMode(0); // 0: fps, 1: ms
+            // align top-left
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.left = '0px';
+            stats.domElement.style.top = '0px';
+            document.body.appendChild( stats.domElement );
+
+            var canvas = document.querySelector('.visualizer');
+            var canvasCtx = canvas.getContext("2d");
+            canvasCtx.lineWidth = 2;
+
+            var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+            var analyser = audioCtx.createAnalyser();
+            // analyser.minDecibels = -90;
+            // analyser.maxDecibels = -10;
+            analyser.smoothingTimeConstant = 0.85;
+            analyser.fftSize = Math.pow(2, Math.round(Math.log2(canvas.width)));
+
+            var gainNode = audioCtx.createGain();
+
+            var audio = new Audio();
+            audio.src = 'paradise_circus.mp3';
+            audio.controls = true;
+            audio.autoplay = true;
+            document.body.appendChild(audio);
+
+            audio.addEventListener('canplay', function(e) {
+                gotStream(audio);
+            }, false);
+
+            // navigator.getUserMedia = ( navigator.getUserMedia ||
+            //                         navigator.webkitGetUserMedia ||
+            //                         navigator.mozGetUserMedia ||
+            //                         navigator.msGetUserMedia);
+
+            // navigator.getUserMedia({audio: true}, gotStream, console.error);
+
+            function gotStream (stream) {
+                // source = audioCtx.createMediaStreamSource(stream);
+                source = audioCtx.createMediaElementSource(audio);
+                source.connect(analyser);
+                analyser.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+                draw();
+            }
+
+            function draw () {
+                drawVisual = requestAnimationFrame(draw);
+
+                canvasCtx.fillStyle = 'rgb(200, 200, 200)';
+                canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+                drawByteFrequencyData();
+
+                drawByteTimeDomainData();
+
+                stats.update();
+            }
+
+            function drawByteTimeDomainData () {
+                var bufferLength = analyser.frequencyBinCount;
+                var dataArray = new Uint8Array(bufferLength);
+                analyser.getByteTimeDomainData(dataArray);
+
+                canvasCtx.lineWidth = 2;
+                canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
+                canvasCtx.lineJoin = canvasCtx.lineCap = 'round';
+
+                canvasCtx.beginPath();
+
+                var sliceWidth = canvas.width * 1.0 / bufferLength;
+                var x = 0;
+                for(var i = 0; i < bufferLength; i++) {
+                    var value = dataArray[i] / 128.0;
+                    var y = value * canvas.height / 2;
+                    if(i === 0) {
+                        canvasCtx.moveTo(x, y);
+                    } else {
+                        canvasCtx.lineTo(x, y);
+                    }
+                    x += sliceWidth;
+                }
+
+                canvasCtx.lineTo(canvas.width, canvas.height / 2);
+                canvasCtx.stroke();
+            }
+
+            function drawByteFrequencyData () {
+                var bufferLength = analyser.frequencyBinCount;
+                var dataArray = new Uint8Array(bufferLength);
+                analyser.getByteFrequencyData(dataArray);
+
+                for ( var i = 0; i < (bufferLength); i++ ) {
+                    var value = dataArray[i];
+                    var percent = value / 256;
+                    var height = canvas.height * percent;
+                    var offset = canvas.height - height - 1;
+                    var barWidth = canvas.width / analyser.frequencyBinCount;
+                    var hue = i / analyser.frequencyBinCount * 360;
+                    canvasCtx.fillStyle = 'hsla(' + hue + ', 100%, 50%, 0.5)';
+                    canvasCtx.fillRect(i * barWidth, offset, barWidth, height);
+                }
+            }
+
+            function indexToFreq(analyser, index) {
+                var nyquist = audioCtx.sampleRate / 2;
+                return nyquist/(analyser.fftSize/2) * index;
+            }
+
+            var gui = new dat.GUI();
+
+            var f1 = gui.addFolder('Analyser');
+            f1.open();
+            f1.add(analyser, 'minDecibels', -100, 0);
+            f1.add(analyser, 'maxDecibels', -100, 0);
+            f1.add(analyser, 'smoothingTimeConstant', 0, 1).step(0.01);
+            f1.add(analyser, 'fftSize', [32,64,128,256,512,1024,2048]);
+
+            var f2 = gui.addFolder('Visualizer');
+            f2.open();
+            f2.add(canvasCtx, 'lineWidth');
+
+        })();
+        </script>
+    </body>
+</html>
