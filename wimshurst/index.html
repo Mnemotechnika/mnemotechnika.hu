@@ -32,24 +32,32 @@
 
             // Load the .glb model
             BABYLON.SceneLoader.Append("", "1M_Wimshurst8.glb", scene, function (scene) {
-               // Compute the model's bounding info to fit it to the screen
-               scene.executeWhenReady(function () {
-                    const meshes = scene.meshes;
-                    const boundingInfo = meshes.reduce((boundingInfo, mesh) => {
-                        return boundingInfo ? boundingInfo.merge(mesh.getBoundingInfo()) : mesh.getBoundingInfo();
-                    }, null);
+                scene.executeWhenReady(function () {
+                    let minVector = new BABYLON.Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
+                    let maxVector = new BABYLON.Vector3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE);
 
-                    // If boundingInfo exists, fit the model to the camera view
-                    if (boundingInfo) {
-                        const boundingSize = boundingInfo.boundingBox.extendSizeWorld;
-                        const maxDimension = Math.max(boundingSize.x, boundingSize.y, boundingSize.z);
+                    // Calculate bounding box manually
+                    scene.meshes.forEach(mesh => {
+                        const boundingInfo = mesh.getBoundingInfo();
+                        const boundingBox = boundingInfo.boundingBox;
 
-                        // Position camera to fit the model based on the bounding box size
-                        camera.target = boundingInfo.boundingBox.centerWorld;
-                        camera.radius = maxDimension * 2.5;  // Adjust to fit the model
-                        camera.lowerRadiusLimit = maxDimension * 1.1; // Prevent too much zoom-in
-                        camera.upperRadiusLimit = maxDimension * 4;   // Prevent too much zoom-out
-                    }
+                        // Update min and max vectors based on the bounding box
+                        minVector = BABYLON.Vector3.Minimize(minVector, boundingBox.minimumWorld);
+                        maxVector = BABYLON.Vector3.Maximize(maxVector, boundingBox.maximumWorld);
+                    });
+
+                    // Compute the center and size of the bounding box
+                    const boundingCenter = BABYLON.Vector3.Center(minVector, maxVector);
+                    const boundingSize = maxVector.subtract(minVector);
+
+                    // Set the camera target to the center of the model
+                    camera.target = boundingCenter;
+
+                    // Adjust the camera radius to fit the model within view
+                    const maxDimension = Math.max(boundingSize.x, boundingSize.y, boundingSize.z);
+                    camera.radius = maxDimension * 2.5;
+                    camera.lowerRadiusLimit = maxDimension * 1.1; // Prevent too much zoom-in
+                    camera.upperRadiusLimit = maxDimension * 4;   // Prevent too much zoom-out
                 });
             }, null, function (scene, message) {
                 console.error(message);
