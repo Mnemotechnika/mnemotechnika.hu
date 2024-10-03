@@ -32,7 +32,25 @@
 
             // Load the .glb model
             BABYLON.SceneLoader.Append("", "1M_Wimshurst8.glb", scene, function (scene) {
-                console.log("Model loaded!");
+               // Compute the model's bounding info to fit it to the screen
+               scene.executeWhenReady(function () {
+                    const meshes = scene.meshes;
+                    const boundingInfo = meshes.reduce((boundingInfo, mesh) => {
+                        return boundingInfo ? boundingInfo.merge(mesh.getBoundingInfo()) : mesh.getBoundingInfo();
+                    }, null);
+
+                    // If boundingInfo exists, fit the model to the camera view
+                    if (boundingInfo) {
+                        const boundingSize = boundingInfo.boundingBox.extendSizeWorld;
+                        const maxDimension = Math.max(boundingSize.x, boundingSize.y, boundingSize.z);
+
+                        // Position camera to fit the model based on the bounding box size
+                        camera.target = boundingInfo.boundingBox.centerWorld;
+                        camera.radius = maxDimension * 2.5;  // Adjust to fit the model
+                        camera.lowerRadiusLimit = maxDimension * 1.1; // Prevent too much zoom-in
+                        camera.upperRadiusLimit = maxDimension * 4;   // Prevent too much zoom-out
+                    }
+                });
             }, null, function (scene, message) {
                 console.error(message);
             });
