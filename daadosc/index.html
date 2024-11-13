@@ -96,6 +96,8 @@
                 canvasCtx.fillStyle = "rgba( 255, 0, 0, 0.5 )";
                 canvasCtx.beginPath();
                 canvasCtx.moveTo( oscCanvas.width * corners.right, oscCanvas.height * corners.bottom );
+
+                console.log( "corner x: ",oscCanvas.width * corners.right, "corner y: ", oscCanvas.height * corners.bottom )
                 
                 if ( analyser && !music.paused ) analyser.getByteTimeDomainData( frequencyData );
                 
@@ -104,7 +106,7 @@
                     const y = Math.abs( ( i * ( oscCanvas.height / frequencyData.length ) ) - ( oscCanvas.height * Math.abs( corners.bottom - 1 ) ) );
                     //const y = Math.abs( frequencyData[ i ] / 128 * ( oscCanvas.height / 2 ) - ( oscCanvas.height * Math.abs( corners.bottom - 1 ) ) );
                     canvasCtx.lineTo( x, y + 100 );
-                    console.log( "i: ", i, "x: ", x, "y: ",  y );
+                    console.log( "i: ", i, "x: ", x, "y: ", y );
                 }
                 canvasCtx.lineTo( oscCanvas.width * Math.abs( corners.right - 1 ), oscCanvas.height * Math.abs( corners.bottom - 1 ) );
                 canvasCtx.lineTo( oscCanvas.width * corners.right, oscCanvas.height * Math.abs( corners.bottom - 1 ) );
