@@ -74,7 +74,6 @@
                         analyser = audioCtx.createAnalyser();
                         analyser.fftSize = 32;
                         analyser.smoothingTimeConstant = 0;
-                        console.log( "analyser.frequencyBinCount: ", analyser.frequencyBinCount )
                         frequencyData = new Uint8Array( analyser.frequencyBinCount );
                         audioSrc.connect( analyser );
                         audioSrc.connect( audioCtx.destination );
@@ -96,8 +95,6 @@
                 canvasCtx.fillStyle = "rgba( 255, 0, 0, 0.5 )";
                 canvasCtx.beginPath();
                 canvasCtx.moveTo( oscCanvas.width * corners.right, oscCanvas.height * corners.bottom );
-
-                console.log( "corner x: ", oscCanvas.width * corners.right, "corner y: ", oscCanvas.height * corners.bottom )
                 
                 if ( analyser && !music.paused ) analyser.getByteTimeDomainData( frequencyData );
                 
