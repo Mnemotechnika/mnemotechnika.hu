@@ -129,11 +129,11 @@
                 canvasCtx.rotate(angleInRadians);
                 
                 canvasCtx.fillStyle = 'red';
+                canvasCtx.strokeStyle = "red";
                 canvasCtx.beginPath();
 
                 canvasCtx.arc(0, 0, radius, 0, Math.PI); // Draws a half-circle from 0 to π radians
 
-                //canvasCtx.lineTo(-radius, 0); // Line from the end of the arc back to the start
                 if ( analyser && !music.paused ) analyser.getByteFrequencyData( frequencyData );
                 //if ( analyser && !music.paused ) analyser. getByteTimeDomainData( frequencyData );
                 
@@ -144,6 +144,8 @@
                     const divider = ( i < frequencyData.length / 2 ) ? ( frequencyData.length / 2 ) / i : ( frequencyData.length / 2 ) / ( frequencyData.length - i )
                     canvasCtx.lineTo( x, 0 + ( ( frequencyData[ i ] - 128 ) / divider ) );
                 }
+
+                canvasCtx.lineTo(-radius, 0);
 
                 canvasCtx.closePath();
                 canvasCtx.fill();
