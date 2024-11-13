@@ -90,7 +90,8 @@
                     canvasCtx.beginPath();
                     canvasCtx.moveTo( corners.x, corners.y);
                     canvasCtx.lineTo( oscCanvas.width - corners.x, oscCanvas.height - corners.y);
-                    canvasCtx.moveTo( corners.x, corners.y);
+                    canvasCtx.lineTo( corners.x, oscCanvas.height - corners.y);
+                    canvasCtx.lineTo( corners.x, corners.y);
                     canvasCtx.fill();
                 }
             }
