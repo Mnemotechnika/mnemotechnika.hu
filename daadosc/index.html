@@ -122,9 +122,12 @@
 
             function renderMeter2() {
                 requestAnimationFrame( renderMeter2 );
+                canvasCtx.clearRect(0, 0, oscCanvas.width, oscCanvas.height);
+
                 canvasCtx.save();
                 canvasCtx.translate( centerX, centerY );
                 canvasCtx.rotate(angleInRadians);
+                
                 canvasCtx.fillStyle = 'red';
                 canvasCtx.beginPath();
 
@@ -141,12 +144,13 @@
                     const divider = ( i < frequencyData.length / 2 ) ? ( frequencyData.length / 2 ) / i : ( frequencyData.length / 2 ) / ( frequencyData.length - i )
                     canvasCtx.lineTo( x, 0 + ( ( frequencyData[ i ] - 128 ) / divider ) );
                 }
-                // Close the path and fill the shape
+
                 canvasCtx.closePath();
                 canvasCtx.fill();
-
-                // Restore the canvas to its original state
                 canvasCtx.restore();
+
+
+
             }
 
 
