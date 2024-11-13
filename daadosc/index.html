@@ -74,7 +74,7 @@
                         analyser = audioCtx.createAnalyser();
                         analyser.fftsize = 32;
                         analyser.smoothingTimeConstant = 0;
-                        console.log( "analyser.frequencyBinCount: "analyser.frequencyBinCount )
+                        console.log( "analyser.frequencyBinCount: ", analyser.frequencyBinCount )
                         frequencyData = new Uint8Array( analyser.frequencyBinCount );
                         audioSrc.connect( analyser );
                         audioSrc.connect( audioCtx.destination );
