@@ -86,8 +86,12 @@
                 }
             });
             var corners = {
-                x: 0,
-                y: 0
+                right: 0,
+                bottom: 0
+            }
+            var delta = {
+                x: 1,
+                y: 1
             }
 
             function renderMeter() {
@@ -110,10 +114,10 @@
                 } else if ( music.src.length ) {
                     canvasCtx.fillStyle = "rgba( 255, 18, 26, 0.5 )";
                     canvasCtx.beginPath();
-                    canvasCtx.moveTo( corners.x, corners.y);
-                    canvasCtx.lineTo( oscCanvas.width - corners.x, oscCanvas.height - corners.y);
-                    canvasCtx.lineTo( corners.x, oscCanvas.height - corners.y);
-                    canvasCtx.lineTo( corners.x, corners.y);
+                    canvasCtx.moveTo( oscCanvas.width * corners.right, oscCanvas.width * corners.bottom );
+                    canvasCtx.lineTo( oscCanvas.width * Math.abs( corners.right - 1 ), oscCanvas.height * Math.abs( corners.bottom - 1 ) );
+                    canvasCtx.lineTo( oscCanvas.width * corners.right, oscCanvas.height * Math.abs( corners.bottom - 1 ) );
+                    canvasCtx.lineTo( oscCanvas.width * corners.right, oscCanvas.width * corners.bottom );
                     canvasCtx.fill();
                 }
             }
