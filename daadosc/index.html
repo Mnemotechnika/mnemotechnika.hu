@@ -86,7 +86,7 @@
                 }
             });
             var corners = {
-                right: 0.5,
+                right: 0.7,
                 bottom: 1
             }
 
@@ -106,6 +106,7 @@
                     const divider = ( i < frequencyData.length / 2 ) ? ( frequencyData.length / 2 ) / i : ( frequencyData.length / 2 ) / ( frequencyData.length - i )
                     canvasCtx.lineTo( x, y + ( ( frequencyData[ i ] - 128 ) / divider ) );
                 }
+
                 canvasCtx.lineTo( oscCanvas.width * Math.abs( corners.right - 1 ), oscCanvas.height * Math.abs( corners.bottom - 1 ) );
                 canvasCtx.lineTo( oscCanvas.width * corners.right, oscCanvas.height * Math.abs( corners.bottom - 1 ) );
                 canvasCtx.lineTo( oscCanvas.width * corners.right, oscCanvas.height * corners.bottom );
