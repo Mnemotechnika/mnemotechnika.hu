@@ -99,7 +99,7 @@
                 
                 if ( analyser && !music.paused ) analyser.getByteFrequencyData( frequencyData );
                 
-                for ( let i = 1; i < frequencyData.length; i++ ) {
+                for ( let i = 2; i < frequencyData.length -1; i++ ) {
                     const x = Math.abs( ( oscCanvas.width * corners.right ) - ( i * ( oscCanvas.width / frequencyData.length ) ) )
                     const y = Math.abs( ( oscCanvas.height * corners.bottom ) - ( i * ( oscCanvas.height / frequencyData.length ) ) );
                     canvasCtx.lineTo( x, y + ( ( frequencyData[ i ] - 128 ) / 2 ) );
