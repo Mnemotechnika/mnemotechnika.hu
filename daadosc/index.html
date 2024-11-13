@@ -112,8 +112,8 @@
 
                 canvasCtx.arc( 0, 0, radius, 0, Math.PI ); // Draws a half-circle from 0 to π radians
 
-                if ( analyser && !music.paused ) analyser.getByteFrequencyData( frequencyData );
-                //if ( analyser && !music.paused ) analyser. getByteTimeDomainData( frequencyData );
+                //if ( analyser && !music.paused ) analyser.getByteFrequencyData( frequencyData );
+                if ( analyser && !music.paused ) analyser. getByteTimeDomainData( frequencyData );
                 
                 for ( let i = 1; i < frequencyData.length; i++ ) {
                     const unit = radius / ( ( frequencyData.length / 2 ) );
