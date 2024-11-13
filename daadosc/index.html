@@ -93,10 +93,9 @@
             const centerX = oscCanvas.width / 2;
             const centerY = oscCanvas.height / 2;
             const radius = 300;
-            const rotationAngle = 0; // in degrees
 
             // Convert the rotation angle to radians
-            const angleInRadians = (rotationAngle * Math.PI) / 180;
+            const diagonalAngle = Math.atan2( oscCanvas.height, oscCanvas.width );
 
             function renderMeter() {
                 requestAnimationFrame( renderMeter );
@@ -104,7 +103,7 @@
 
                 canvasCtx.save();
                 canvasCtx.translate( centerX, centerY );
-                canvasCtx.rotate(angleInRadians);
+                canvasCtx.rotate( diagonalAngle );
                 
                 canvasCtx.fillStyle = 'red';
                 canvasCtx.strokeStyle = "red";
