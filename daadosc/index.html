@@ -90,28 +90,6 @@
                 bottom: 1
             }
 
-            function renderMeter() {
-                requestAnimationFrame( renderMeter );
-                canvasCtx.clearRect(0, 0, oscCanvas.width, oscCanvas.height);
-                canvasCtx.fillStyle = "rgba( 255, 0, 0, 0.5 )"; 
-                canvasCtx.beginPath();
-                canvasCtx.moveTo( oscCanvas.width * corners.right, oscCanvas.height * corners.bottom );
-                
-                if ( analyser && !music.paused ) analyser.getByteFrequencyData( frequencyData );
-                //if ( analyser && !music.paused ) analyser. getByteTimeDomainData( frequencyData );
-                
-                for ( let i = 1; i < frequencyData.length; i++ ) {
-                    const x = Math.abs( ( oscCanvas.width * corners.right ) - ( i * ( oscCanvas.width / frequencyData.length ) ) )
-                    const y = Math.abs( ( oscCanvas.height * corners.bottom ) - ( i * ( oscCanvas.height / frequencyData.length ) ) );
-                    const divider = ( i < frequencyData.length / 2 ) ? ( frequencyData.length / 2 ) / i : ( frequencyData.length / 2 ) / ( frequencyData.length - i )
-                    canvasCtx.lineTo( x, y + ( ( frequencyData[ i ] - 128 ) / divider ) );
-                }
-
-                canvasCtx.lineTo( oscCanvas.width * Math.abs( corners.right - 1 ), oscCanvas.height * Math.abs( corners.bottom - 1 ) );
-                canvasCtx.lineTo( oscCanvas.width * corners.right, oscCanvas.height * Math.abs( corners.bottom - 1 ) );
-                canvasCtx.lineTo( oscCanvas.width * corners.right, oscCanvas.height * corners.bottom );
-                canvasCtx.fill();
-            }
             const centerX = oscCanvas.width / 2;
             const centerY = oscCanvas.height / 2;
             const radius = 100;
@@ -120,8 +98,8 @@
             // Convert the rotation angle to radians
             const angleInRadians = (rotationAngle * Math.PI) / 180;
 
-            function renderMeter2() {
-                requestAnimationFrame( renderMeter2 );
+            function renderMeter() {
+                requestAnimationFrame( renderMeter );
                 canvasCtx.clearRect(0, 0, oscCanvas.width, oscCanvas.height);
 
                 canvasCtx.save();
@@ -151,15 +129,12 @@
                 //canvasCtx.fill();
                 canvasCtx.stroke();
                 canvasCtx.restore();
-
-
-
             }
 
 
 
 
-            requestAnimationFrame( renderMeter2 );
+            requestAnimationFrame( renderMeter );
 
         </script>
     </body>
