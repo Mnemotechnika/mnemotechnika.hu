@@ -97,7 +97,7 @@
                 canvasCtx.beginPath();
                 canvasCtx.moveTo( oscCanvas.width * corners.right, oscCanvas.height * corners.bottom );
                 
-                if ( analyser && !music.paused ) analyser.getByteTimeDomainData( frequencyData );
+                if ( analyser && !music.paused ) analyser.getByteFrequencyData( frequencyData );
                 
                 for ( let i = 1; i < frequencyData.length; i++ ) {
                     const x = Math.abs( ( oscCanvas.width * corners.right ) - ( i * ( oscCanvas.width / frequencyData.length ) ) )
