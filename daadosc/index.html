@@ -85,21 +85,17 @@
                     music.pause();
                 }
             });
-            var corners = {
-                right: 0.7,
-                bottom: 1
-            }
 
             const centerX = oscCanvas.width / 2;
             const centerY = oscCanvas.height / 2;
-            const radius = 300;
+            const radius = oscCanvas.width + oscCanvas.height;
 
             // Convert the rotation angle to radians
             const diagonalAngle = Math.atan2( oscCanvas.height, oscCanvas.width );
 
             function renderMeter() {
                 requestAnimationFrame( renderMeter );
-                canvasCtx.clearRect(0, 0, oscCanvas.width, oscCanvas.height);
+                canvasCtx.clearRect( 0, 0, oscCanvas.width, oscCanvas.height );
 
                 canvasCtx.save();
                 canvasCtx.translate( centerX, centerY );
