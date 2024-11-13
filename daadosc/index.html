@@ -93,41 +93,25 @@
             function renderMeter() {
                 requestAnimationFrame( renderMeter );
                 canvasCtx.clearRect(0, 0, oscCanvas.width, oscCanvas.height);
-                if ( analyser && !music.paused ) {
-                    const mX = ( Math.floor(( oscCanvas.width / music.duration ) * music.currentTime ) )
-                    analyser.getByteTimeDomainData( frequencyData );
-                    canvasCtx.beginPath();
-                    canvasCtx.moveTo( mX, 0 );
-                    canvasCtx.lineTo( mX, oscCanvas.height );
-                    for ( let i = 0; i < frequencyData.length; i++ ) {
-                        const x = i * ( oscCanvas.width / frequencyData.length )
-                        const y = frequencyData[ i ] / 128 * ( oscCanvas.height / 2 );
-                        ( i === 0 ) ? canvasCtx.moveTo( x, y ) : canvasCtx.lineTo( x, y );
-                    }
-                    canvasCtx.lineWidth = 2;
-                    canvasCtx.strokeStyle = "rgb( 255, 18, 26 )";
-                    canvasCtx.fill();
-                } else if ( music.src.length ) {
-                    canvasCtx.fillStyle = "rgba( 255, 18, 26, 0.5 )";
-                    canvasCtx.beginPath();
-                    canvasCtx.moveTo( oscCanvas.width * corners.right, oscCanvas.height * corners.bottom );
-                    
-                    
-                    
-                    //canvasCtx.lineTo( oscCanvas.width * Math.abs( corners.right - 1 ), oscCanvas.height * Math.abs( corners.bottom - 1 ) );
-                    
-                    for ( let i = 1; i <= frequencyData.length; i++ ) {
-                        const x = Math.abs( ( i * ( oscCanvas.width / frequencyData.length ) ) - ( oscCanvas.width * Math.abs( corners.right - 1 ) ) )
-                        const y = Math.abs( frequencyData[ i ] / 128 * ( oscCanvas.height / 2 ) - ( oscCanvas.height * Math.abs( corners.bottom - 1 ) ) );
-                        canvasCtx.lineTo( x, y );
-                    }
-                    
-                    
-                    
-                    canvasCtx.lineTo( oscCanvas.width * corners.right, oscCanvas.height * Math.abs( corners.bottom - 1 ) );
-                    canvasCtx.lineTo( oscCanvas.width * corners.right, oscCanvas.height * corners.bottom );
-                    canvasCtx.fill();
+                canvasCtx.fillStyle = "rgba( 255, 18, 26, 0.5 )";
+                canvasCtx.beginPath();
+                canvasCtx.moveTo( oscCanvas.width * corners.right, oscCanvas.height * corners.bottom );
+                
+                if ( analyser && !music.paused ) analyser.getByteTimeDomainData( frequencyData );
+                
+                //canvasCtx.lineTo( oscCanvas.width * Math.abs( corners.right - 1 ), oscCanvas.height * Math.abs( corners.bottom - 1 ) );
+                
+                for ( let i = 1; i <= frequencyData.length; i++ ) {
+                    const x = Math.abs( ( i * ( oscCanvas.width / frequencyData.length ) ) - ( oscCanvas.width * Math.abs( corners.right - 1 ) ) )
+                    const y = Math.abs( frequencyData[ i ] / 128 * ( oscCanvas.height / 2 ) - ( oscCanvas.height * Math.abs( corners.bottom - 1 ) ) );
+                    canvasCtx.lineTo( x, y );
                 }
+                
+                
+                
+                canvasCtx.lineTo( oscCanvas.width * corners.right, oscCanvas.height * Math.abs( corners.bottom - 1 ) );
+                canvasCtx.lineTo( oscCanvas.width * corners.right, oscCanvas.height * corners.bottom );
+                canvasCtx.fill();
             }
             requestAnimationFrame( renderMeter );
 
