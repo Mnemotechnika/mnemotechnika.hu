@@ -74,7 +74,7 @@
                         if ( !audioSrc ) audioSrc = audioCtx.createMediaElementSource( music );
                         analyser = audioCtx.createAnalyser();
                         analyser.fftSize = 32;
-                        analyser.smoothingTimeConstant = 0;
+                        analyser.smoothingTimeConstant = 1;
                         frequencyData = new Uint8Array( analyser.frequencyBinCount );
                         audioSrc.connect( analyser );
                         audioSrc.connect( audioCtx.destination );
