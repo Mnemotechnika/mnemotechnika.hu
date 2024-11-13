@@ -114,7 +114,7 @@
             }
             const centerX = oscCanvas.width / 2;
             const centerY = oscCanvas.height / 2;
-            const radius = 50;
+            const radius = 200;
             const rotationAngle = 45; // in degrees
 
             // Convert the rotation angle to radians
@@ -137,7 +137,7 @@
                 for ( let i = 1; i < frequencyData.length; i++ ) {
                     const unit = radius / ( ( frequencyData.length / 2 ) );
                     const x = radius - i * unit;
-                    console.log( x );
+                    console.log( "unit: ", unit, "x: ", x );
                     const divider = ( i < frequencyData.length / 2 ) ? ( frequencyData.length / 2 ) / i : ( frequencyData.length / 2 ) / ( frequencyData.length - i )
                     canvasCtx.lineTo( x, 0 + ( ( frequencyData[ i ] - 128 ) / divider ) );
                 }
