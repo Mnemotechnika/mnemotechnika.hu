@@ -119,7 +119,7 @@
                     const unit = radius / ( ( frequencyData.length / 2 ) );
                     const x = -radius + i * unit;
 
-                    const divider = 2 //( i < frequencyData.length / 2 ) ? ( frequencyData.length / 2 ) / i : ( frequencyData.length / 2 ) / ( frequencyData.length - i )
+                    const divider = 1 //( i < frequencyData.length / 2 ) ? ( frequencyData.length / 2 ) / i : ( frequencyData.length / 2 ) / ( frequencyData.length - i )
                     canvasCtx.lineTo( x, 0 + ( ( frequencyData[ i ] - 128 ) / divider ) );
                 }
 
