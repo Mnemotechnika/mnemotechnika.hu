@@ -103,7 +103,7 @@
                     const x = Math.abs( ( i * ( oscCanvas.width / frequencyData.length ) ) - ( oscCanvas.width * Math.abs( corners.right - 1 ) ) )
                     const y = Math.abs( ( i * ( oscCanvas.height / frequencyData.length ) ) - ( oscCanvas.height * Math.abs( corners.bottom - 1 ) ) );
                     //const y = Math.abs( frequencyData[ i ] / 128 * ( oscCanvas.height / 2 ) - ( oscCanvas.height * Math.abs( corners.bottom - 1 ) ) );
-                    canvasCtx.lineTo( x, y );
+                    canvasCtx.lineTo( x, y + 10 );
                     console.log( "i: ", i, "x: ", x, "y: ",  y );
                 }
                 canvasCtx.lineTo( oscCanvas.width * Math.abs( corners.right - 1 ), oscCanvas.height * Math.abs( corners.bottom - 1 ) );
