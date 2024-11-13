@@ -122,32 +122,32 @@
 
             function renderMeter2() {
                 requestAnimationFrame( renderMeter2 );
-                ctx.save();
+                canvasCtx.save();
 
                 // Move the canvas origin to the center point
-                ctx.translate(centerX, centerY);
+                canvasCtx.translate(centerX, centerY);
 
                 // Rotate the canvas by the specified angle
-                ctx.rotate(angleInRadians);
+                canvasCtx.rotate(angleInRadians);
 
                 // Set the fill color
-                ctx.fillStyle = 'blue';
+                canvasCtx.fillStyle = 'blue';
 
                 // Begin a new path for the half-circle and line
-                ctx.beginPath();
+                canvasCtx.beginPath();
 
                 // Draw the half-circle (centered at the new origin, so use (0, 0) as the center)
-                ctx.arc(0, 0, radius, 0, Math.PI); // Draws a half-circle from 0 to π radians
+                canvasCtx.arc(0, 0, radius, 0, Math.PI); // Draws a half-circle from 0 to π radians
 
                 // Add a line to close the shape back to the starting point
-                ctx.lineTo(-radius, 0); // Line from the end of the arc back to the start
+                canvasCtx.lineTo(-radius, 0); // Line from the end of the arc back to the start
 
                 // Close the path and fill the shape
-                ctx.closePath();
-                ctx.fill();
+                canvasCtx.closePath();
+                canvasCtx.fill();
 
                 // Restore the canvas to its original state
-                ctx.restore();
+                canvasCtx.restore();
             }
 
 
