@@ -102,7 +102,7 @@
                 for ( let i = 1; i < frequencyData.length; i++ ) {
                     const x = Math.abs( ( oscCanvas.width * corners.right ) - ( i * ( oscCanvas.width / frequencyData.length ) ) )
                     const y = Math.abs( ( oscCanvas.height * corners.bottom ) - ( i * ( oscCanvas.height / frequencyData.length ) ) );
-                    const divider = (i > frequencyData.length / 2 ) ? ( frequencyData.length / 2 ) /i : ( frequencyData.length / 2 ) / ( frequencyData.length - i )
+                    const divider = ( i < frequencyData.length / 2 ) ? ( frequencyData.length / 2 ) / i : ( frequencyData.length / 2 ) / ( frequencyData.length - i )
                     console.log( divider );
                     canvasCtx.lineTo( x, y + ( ( frequencyData[ i ] - 128 ) / divider ) );
                 }
