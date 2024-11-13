@@ -87,18 +87,14 @@
                 }
             });
 
-           
-
-            // Convert the rotation angle to radians
-            const diagonalAngle = Math.atan2( oscCanvas.height, oscCanvas.width );
-
             function renderMeter() {
                 requestAnimationFrame( renderMeter );
 
                 const centerX = oscCanvas.width / 2;
                 const centerY = oscCanvas.height / 2;
                 const radius = oscCanvas.width + oscCanvas.height;
-                
+                const diagonalAngle = Math.atan2( oscCanvas.height, oscCanvas.width );
+
                 canvasCtx.clearRect( 0, 0, oscCanvas.width, oscCanvas.height );
 
                 canvasCtx.save();
@@ -126,9 +122,6 @@
                 canvasCtx.fill();
                 canvasCtx.restore();
             }
-
-
-
 
             requestAnimationFrame( renderMeter );
 
