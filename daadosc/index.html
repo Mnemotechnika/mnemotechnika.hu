@@ -95,13 +95,18 @@
                 const radius = oscCanvas.width + oscCanvas.height;
                 const diagonalAngle = Math.atan2( oscCanvas.height, oscCanvas.width );
 
+                const topLeftToBottomRight = diagonalAngle;
+                const bottomRightToTopLeft = diagonalAngle - Math.PI;
+                const topRightToBottomLeft = -diagonalAngle;
+                const bottomLeftToTopRight = Math.PI - diagonalAngle;
+
                 canvasCtx.clearRect( 0, 0, oscCanvas.width, oscCanvas.height );
 
                 canvasCtx.save();
                 canvasCtx.translate( centerX, centerY );
                 canvasCtx.rotate( diagonalAngle );
                 
-                canvasCtx.fillStyle = 'red';
+                canvasCtx.fillStyle = 'rgba( 255, 0, 0, 0.5 )';
 
                 canvasCtx.beginPath();
 
