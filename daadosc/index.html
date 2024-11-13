@@ -123,25 +123,24 @@
             function renderMeter2() {
                 requestAnimationFrame( renderMeter2 );
                 canvasCtx.save();
-
-                // Move the canvas origin to the center point
                 canvasCtx.translate(centerX, centerY);
-
-                // Rotate the canvas by the specified angle
                 canvasCtx.rotate(angleInRadians);
-
-                // Set the fill color
                 canvasCtx.fillStyle = 'blue';
-
-                // Begin a new path for the half-circle and line
                 canvasCtx.beginPath();
 
-                // Draw the half-circle (centered at the new origin, so use (0, 0) as the center)
                 canvasCtx.arc(0, 0, radius, 0, Math.PI); // Draws a half-circle from 0 to π radians
 
-                // Add a line to close the shape back to the starting point
                 canvasCtx.lineTo(-radius, 0); // Line from the end of the arc back to the start
-
+                if ( analyser && !music.paused ) analyser.getByteFrequencyData( frequencyData );
+                //if ( analyser && !music.paused ) analyser. getByteTimeDomainData( frequencyData );
+                
+                for ( let i = 1; i < frequencyData.length; i++ ) {
+                    const unit = radius / ( ( frequencyData.length / 2 ) );
+                    const x = radius - i * unit;
+                    
+                    const divider = ( i < frequencyData.length / 2 ) ? ( frequencyData.length / 2 ) / i : ( frequencyData.length / 2 ) / ( frequencyData.length - i )
+                    canvasCtx.lineTo( x, 0 + ( ( frequencyData[ i ] - 128 ) / divider ) );
+                }
                 // Close the path and fill the shape
                 canvasCtx.closePath();
                 canvasCtx.fill();
