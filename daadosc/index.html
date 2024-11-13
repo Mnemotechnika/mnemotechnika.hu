@@ -52,8 +52,8 @@
                         const y = frequencyData[ i ] / 128 * ( oscCanvas.height / 2 );
                         ( i === 0 ) ? canvasCtx.moveTo( x, y ) : canvasCtx.lineTo( x, y );
                     }
-                    canvasCtx.lineWidth = 2;
-                    canvasCtx.strokeStyle = theme[ category ].rgb;
+                    canvasCtx.lineWidth = 5;
+                    canvasCtx.strokeStyle = "rgb( 255, 18, 26 )";
                     canvasCtx.stroke();
                 } else if ( music.src.length ) {
                     canvasCtx.fillStyle = theme[ category ].rgb;
@@ -65,6 +65,7 @@
                 }
             }
             requestAnimationFrame( renderMeter );
+
         </script>
     </body>
 </html>
