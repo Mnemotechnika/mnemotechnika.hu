@@ -95,7 +95,7 @@
                 canvasCtx.clearRect(0, 0, oscCanvas.width, oscCanvas.height);
                 canvasCtx.fillStyle = "rgba( 255, 0, 0, 0.5 )";
                 canvasCtx.beginPath();
-                //canvasCtx.moveTo( oscCanvas.width * corners.right, oscCanvas.height * corners.bottom );
+                canvasCtx.moveTo( oscCanvas.width * corners.right, oscCanvas.height * corners.bottom );
                 
                 if ( analyser && !music.paused ) analyser.getByteTimeDomainData( frequencyData );
                 
