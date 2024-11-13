@@ -73,7 +73,7 @@
                         if ( !audioCtx ) audioCtx = new ( window.AudioContext || window.webkitAudioContext )();
                         if ( !audioSrc ) audioSrc = audioCtx.createMediaElementSource( music );
                         analyser = audioCtx.createAnalyser();
-                        analyser.fftSize = 128;
+                        analyser.fftSize = 32;
                         analyser.smoothingTimeConstant = 0;
                         frequencyData = new Uint8Array( analyser.frequencyBinCount );
                         audioSrc.connect( analyser );
