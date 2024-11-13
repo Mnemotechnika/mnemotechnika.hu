@@ -38,6 +38,11 @@
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
 
+            var corners {
+                x: 0,
+                y: 0
+            }
+
             function renderMeter() {
                 requestAnimationFrame( renderMeter );
                 canvasCtx.clearRect(0, 0, oscCanvas.width, oscCanvas.height);
@@ -58,9 +63,9 @@
                 } else if ( music.src.length ) {
                     canvasCtx.fillStyle = "rgb( 255, 18, 26 )";
                     canvasCtx.beginPath();
-                    canvasCtx.moveTo( ( oscCanvas.width / 2 ) - ( oscCanvas.width / 10 ), ( oscCanvas.height / 2 ) - ( oscCanvas.height / 10 ));
-                    canvasCtx.lineTo( ( oscCanvas.width / 2 ) - ( oscCanvas.width / 10 ), ( oscCanvas.height / 2 ) + ( oscCanvas.height / 10 ));
-                    canvasCtx.lineTo( ( oscCanvas.width / 2 ) + ( oscCanvas.width / 10 ), ( oscCanvas.height / 2 ) );
+                    canvasCtx.moveTo( corners.x, corners.y);
+                    canvasCtx.lineTo( oscCanvas.width - corners.x, oscCanvas.height - corners.y);
+                    canvasCtx.moveTo( corners.sx, corners.sy);
                     canvasCtx.fill();
                 }
             }
