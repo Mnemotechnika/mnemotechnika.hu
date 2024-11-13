@@ -104,7 +104,6 @@
                 for ( let i = 1; i < frequencyData.length; i++ ) {
                     const x = Math.abs( ( oscCanvas.width * corners.right ) - ( i * ( oscCanvas.width / frequencyData.length ) ) )
                     const y = Math.abs( ( oscCanvas.height * corners.bottom ) - ( i * ( oscCanvas.height / frequencyData.length ) ) );
-                    //const y = Math.abs( frequencyData[ i ] / 128 * ( oscCanvas.height / 2 ) - ( oscCanvas.height * Math.abs( corners.bottom - 1 ) ) );
                     canvasCtx.lineTo( x, y + (frequencyData[ i ] / 128) );
                     console.log( "i: ", i, "x: ", x, "y: ", y, "frequencyData: ", frequencyData[ i ] );
                 }
