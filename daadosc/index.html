@@ -49,10 +49,10 @@
             var audioCtx = null;
             var audioSrc = null;
             var analyser = null;
-            var frequencyData = [ 0 ];
+            var frequencyData = [ 0, 0, 0, 0 ];
             oscCanvas = document.createElement( 'canvas' );
-            oscCanvas.height = 50;
-            oscCanvas.width = 300;
+            oscCanvas.height = 0;
+            oscCanvas.width = 0;
             oscCanvas.setAttribute( 'id', 'spectro' );
             
             document.body.appendChild(oscCanvas);
@@ -72,7 +72,7 @@
                         if ( !audioCtx ) audioCtx = new ( window.AudioContext || window.webkitAudioContext )();
                         if ( !audioSrc ) audioSrc = audioCtx.createMediaElementSource( music );
                         analyser = audioCtx.createAnalyser();
-                        analyser.fftSize = 4;
+                        analyser.fftSize = 32;
                         analyser.smoothingTimeConstant = 0;
                         console.log( "analyser.frequencyBinCount: ", analyser.frequencyBinCount )
                         frequencyData = new Uint8Array( analyser.frequencyBinCount );
