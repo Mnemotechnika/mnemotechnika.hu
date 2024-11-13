@@ -65,7 +65,13 @@
             }
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
-
+            oscCanvas.addEventListener('click', () => {
+                if (music.paused) {
+                    music.play();
+                } else {
+                    music.pause();
+                }
+            });
             var corners = {
                 x: 0,
                 y: 0
