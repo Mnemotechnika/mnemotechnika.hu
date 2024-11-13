@@ -112,7 +112,48 @@
                 canvasCtx.lineTo( oscCanvas.width * corners.right, oscCanvas.height * corners.bottom );
                 canvasCtx.fill();
             }
-            requestAnimationFrame( renderMeter );
+            const centerX = oscCanvas.width / 2;
+            const centerY = oscCanvas.height / 2;
+            const radius = 50;
+            const rotationAngle = 45; // in degrees
+
+            // Convert the rotation angle to radians
+            const angleInRadians = (rotationAngle * Math.PI) / 180;
+
+            function renderMeter2() {
+                requestAnimationFrame( renderMeter2 );
+                ctx.save();
+
+                // Move the canvas origin to the center point
+                ctx.translate(centerX, centerY);
+
+                // Rotate the canvas by the specified angle
+                ctx.rotate(angleInRadians);
+
+                // Set the fill color
+                ctx.fillStyle = 'blue';
+
+                // Begin a new path for the half-circle and line
+                ctx.beginPath();
+
+                // Draw the half-circle (centered at the new origin, so use (0, 0) as the center)
+                ctx.arc(0, 0, radius, 0, Math.PI); // Draws a half-circle from 0 to π radians
+
+                // Add a line to close the shape back to the starting point
+                ctx.lineTo(-radius, 0); // Line from the end of the arc back to the start
+
+                // Close the path and fill the shape
+                ctx.closePath();
+                ctx.fill();
+
+                // Restore the canvas to its original state
+                ctx.restore();
+            }
+
+
+
+
+            requestAnimationFrame( renderMeter2 );
 
         </script>
     </body>
