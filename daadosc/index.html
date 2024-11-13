@@ -97,7 +97,7 @@
                 canvasCtx.beginPath();
                 canvasCtx.moveTo( oscCanvas.width * corners.right, oscCanvas.height * corners.bottom );
 
-                console.log( "corner x: ",oscCanvas.width * corners.right, "corner y: ", oscCanvas.height * corners.bottom )
+                console.log( "corner x: ", oscCanvas.width * corners.right, "corner y: ", oscCanvas.height * corners.bottom )
                 
                 if ( analyser && !music.paused ) analyser.getByteTimeDomainData( frequencyData );
                 
