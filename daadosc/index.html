@@ -123,9 +123,9 @@
             function renderMeter2() {
                 requestAnimationFrame( renderMeter2 );
                 canvasCtx.save();
-                canvasCtx.translate(centerX, centerY);
+                canvasCtx.translate( centerX, centerY );
                 canvasCtx.rotate(angleInRadians);
-                canvasCtx.fillStyle = 'blue';
+                canvasCtx.fillStyle = 'red';
                 canvasCtx.beginPath();
 
                 canvasCtx.arc(0, 0, radius, 0, Math.PI); // Draws a half-circle from 0 to π radians
