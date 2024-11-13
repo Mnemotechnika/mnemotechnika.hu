@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+	
+	<head>
+		<title>DAAD OSC</title>
+		<meta charset="utf8">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    </head>
+    <body>
+
+
+
+        <script>
+            var music = new Audio();
+            music.crossOrigin = "anonymous";
+            music.preload = 'auto';
+            music.volume = 0.8;
+            music.muted = false;
+            var musicLoaded = false;
+            var audioCtx = null;
+            var audioSrc = null;
+            var analyser = null;
+            var frequencyData = [ 0 ];
+            oscCanvas = document.createElement( 'canvas' );
+            oscCanvas.height = 50;
+            oscCanvas.width = 300;
+            oscCanvas.setAttribute( 'id', 'spectro' );
+            
+            document.body.appendChild(oscCanvas);
+
+            var canvasCtx = oscCanvas.getContext( "2d" );
+ 
+            function resizeCanvas() {
+                oscCanvas.width = window.innerWidth;
+                oscCanvas.height = window.innerHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            function renderMeter() {
+                requestAnimationFrame( renderMeter );
+                canvasCtx.clearRect(0, 0, oscCanvas.width, oscCanvas.height);
+                if ( analyser && !music.paused ) {
+                    const mX = ( Math.floor(( oscCanvas.width / music.duration ) * music.currentTime ) )
+                    analyser.getByteTimeDomainData( frequencyData );
+                    canvasCtx.beginPath();
+                    canvasCtx.moveTo( mX, 0 );
+                    canvasCtx.lineTo( mX, oscCanvas.height );
+                    for ( let i = 0; i < frequencyData.length; i++ ) {
+                        const x = i * ( oscCanvas.width / frequencyData.length )
+                        const y = frequencyData[ i ] / 128 * ( oscCanvas.height / 2 );
+                        ( i === 0 ) ? canvasCtx.moveTo( x, y ) : canvasCtx.lineTo( x, y );
+                    }
+                    canvasCtx.lineWidth = 2;
+                    canvasCtx.strokeStyle = theme[ category ].rgb;
+                    canvasCtx.stroke();
+                } else if ( music.src.length ) {
+                    canvasCtx.fillStyle = theme[ category ].rgb;
+                    canvasCtx.beginPath();
+                    canvasCtx.moveTo( ( oscCanvas.width / 2 ) - ( oscCanvas.width / 10 ), ( oscCanvas.height / 2 ) - ( oscCanvas.height / 10 ));
+                    canvasCtx.lineTo( ( oscCanvas.width / 2 ) - ( oscCanvas.width / 10 ), ( oscCanvas.height / 2 ) + ( oscCanvas.height / 10 ));
+                    canvasCtx.lineTo( ( oscCanvas.width / 2 ) + ( oscCanvas.width / 10 ), ( oscCanvas.height / 2 ) );
+                    canvasCtx.fill();
+                }
+            }
+            requestAnimationFrame( renderMeter );
+        </script>
+    </body>
+</html>
