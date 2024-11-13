@@ -65,9 +65,9 @@
                 oscCanvas.height = window.innerHeight;
             }
             resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
+            window.addEventListener( 'resize', resizeCanvas );
             oscCanvas.addEventListener('click', () => {
-                if (music.paused) {
+                if ( music.paused ) {
                     if ( ( window.AudioContext || window.webkitAudioContext ) && music.src.length ) {
 
                         if ( !audioCtx ) audioCtx = new ( window.AudioContext || window.webkitAudioContext )();
@@ -86,8 +86,8 @@
                 }
             });
             var corners = {
-                right: 1,
-                bottom: 1
+                right: 0.5,
+                bottom: 0.5
             }
 
             function renderMeter() {
