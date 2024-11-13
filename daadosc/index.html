@@ -110,10 +110,10 @@
                 } else if ( music.src.length ) {
                     canvasCtx.fillStyle = "rgba( 255, 18, 26, 0.5 )";
                     canvasCtx.beginPath();
-                    canvasCtx.moveTo( oscCanvas.width * corners.right, oscCanvas.width * corners.bottom );
+                    canvasCtx.moveTo( oscCanvas.width * corners.right, oscCanvas.height * corners.bottom );
                     canvasCtx.lineTo( oscCanvas.width * Math.abs( corners.right - 1 ), oscCanvas.height * Math.abs( corners.bottom - 1 ) );
                     canvasCtx.lineTo( oscCanvas.width * corners.right, oscCanvas.height * Math.abs( corners.bottom - 1 ) );
-                    canvasCtx.lineTo( oscCanvas.width * corners.right, oscCanvas.width * corners.bottom );
+                    canvasCtx.lineTo( oscCanvas.width * corners.right, oscCanvas.height * corners.bottom );
                     canvasCtx.fill();
                 }
             }
