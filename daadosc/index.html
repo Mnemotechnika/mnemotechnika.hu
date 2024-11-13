@@ -72,7 +72,7 @@
                         if ( !audioCtx ) audioCtx = new ( window.AudioContext || window.webkitAudioContext )();
                         if ( !audioSrc ) audioSrc = audioCtx.createMediaElementSource( music );
                         analyser = audioCtx.createAnalyser();
-                        analyser.fftsize = 2048;
+                        analyser.fftsize = 256;
                         analyser.smoothingTimeConstant = 0;
                         frequencyData = new Uint8Array( analyser.frequencyBinCount );
                         audioSrc.connect( analyser );
@@ -105,7 +105,7 @@
                     }
                     canvasCtx.lineWidth = 5;
                     canvasCtx.strokeStyle = "rgb( 255, 18, 26 )";
-                    canvasCtx.stroke();
+                    canvasCtx.fill();
                 } else if ( music.src.length ) {
                     canvasCtx.fillStyle = "rgba( 255, 18, 26, 0.5 )";
                     canvasCtx.beginPath();
