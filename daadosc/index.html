@@ -120,7 +120,7 @@
                     if ( targetAngle > rotationAngle ) {
                         rotateAngle -= rotationSpeed;
                     } else rotateAngle += rotationSpeed;
-                    canvasCtx.rotate( rotateAngle, rotateAngle );
+                    canvasCtx.rotate( targetAngle, rotateAngle );
                 }
                 
                 canvasCtx.fillStyle = 'rgba( 255, 0, 0, 0.5 )';
