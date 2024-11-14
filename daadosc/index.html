@@ -51,7 +51,7 @@
             var audioSrc = null;
             var analyser = null;
             var frequencyData = [ 128, 128, 128, 128 ];
-            
+
             var oscCanvas = document.createElement( 'canvas' );
             oscCanvas.height = window.innerWidth;
             oscCanvas.width = window.innerHeight;
@@ -62,6 +62,8 @@
             const bottomRightToTopLeft = diagonalAngle - Math.PI;
             const topRightToBottomLeft = -diagonalAngle;
             const bottomLeftToTopRight = Math.PI - diagonalAngle;
+
+            const rotationSpeed = 0.1;
 
             document.body.appendChild(oscCanvas);
 
@@ -96,18 +98,22 @@
                 } else {
                     music.pause();
                 }
+                targetAngle = bottomLeftToTopRight;
             });
 
             function renderMeter() {
                 requestAnimationFrame( renderMeter );
 
-
-
                 canvasCtx.clearRect( 0, 0, oscCanvas.width, oscCanvas.height );
 
                 canvasCtx.save();
                 canvasCtx.translate( centerX, centerY );
-                canvasCtx.rotate( diagonalAngle );
+                if ( rotateAngle <> targetAngle ) {
+                    if ( targetAngle > rotationAngle ) {
+                        rotateAngle -= rotationSpeed;
+                    } else rotateAngle += rotationSpeed;
+                    canvasCtx.rotate( diagonalAngle );
+                }
                 
                 canvasCtx.fillStyle = 'rgba( 255, 0, 0, 0.5 )';
 
