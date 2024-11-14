@@ -71,7 +71,7 @@
             function resizeCanvas() {
                 oscCanvas.width = window.innerWidth;
                 oscCanvas.height = window.innerHeight;
-                
+
                 centerX = oscCanvas.width / 2;
                 centerY = oscCanvas.height / 2;
                 radius = ( oscCanvas.width + oscCanvas.height ) / 2;
@@ -104,6 +104,7 @@
                     music.pause();
                 }
                 targetAngle = bottomLeftToTopRight;
+                console.log( targetAngle );
             });
 
             function renderMeter() {
@@ -115,6 +116,7 @@
                 canvasCtx.translate( centerX, centerY );
 
                 if ( rotateAngle < targetAngle || rotateAngle > targetAngle ) {
+                    console.log( rotateAngle );
                     if ( targetAngle > rotationAngle ) {
                         rotateAngle -= rotationSpeed;
                     } else rotateAngle += rotationSpeed;
