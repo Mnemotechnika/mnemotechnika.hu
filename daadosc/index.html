@@ -116,7 +116,7 @@
 
                 if ( rotateAngle < targetAngle || rotateAngle > targetAngle ) {
                     console.log( rotateAngle );
-                    if ( targetAngle > rotationAngle ) {
+                    if ( targetAngle > rotateAngle ) {
                         rotateAngle -= rotationSpeed;
                     } else rotateAngle += rotationSpeed;
                     canvasCtx.rotate( targetAngle, rotateAngle );
