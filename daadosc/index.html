@@ -108,7 +108,7 @@
 
                 canvasCtx.save();
                 canvasCtx.translate( centerX, centerY );
-                if ( rotateAngle <> targetAngle ) {
+                if ( rotateAngle < targetAngle || rotateAngle > targetAngle ) {
                     if ( targetAngle > rotationAngle ) {
                         rotateAngle -= rotationSpeed;
                     } else rotateAngle += rotationSpeed;
