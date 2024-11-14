@@ -115,7 +115,7 @@
                 canvasCtx.translate( centerX, centerY );
 
                 if ( rotateAngle < targetAngle || rotateAngle > targetAngle ) {
-                    console.log( rotateAngle, targetAngle );
+                    console.log( rotateAngle, targetAngle, rotationSpeed, rotateAngle - targetAngle );
                     if ( targetAngle > rotateAngle ) {
                         rotateAngle += rotationSpeed;
                     } else rotateAngle -= rotationSpeed;
