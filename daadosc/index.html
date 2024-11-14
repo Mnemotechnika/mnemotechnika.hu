@@ -51,11 +51,20 @@
             var audioSrc = null;
             var analyser = null;
             var frequencyData = [ 128, 128, 128, 128 ];
-            oscCanvas = document.createElement( 'canvas' );
-            oscCanvas.height = 0;
-            oscCanvas.width = 0;
+            var oscCanvas = document.createElement( 'canvas' );
+            oscCanvas.height = window.innerWidth;
+            oscCanvas.width = window.innerHeight;
             oscCanvas.setAttribute( 'id', 'spectro' );
-            
+            var centerX = oscCanvas.width / 2;
+            var centerY = oscCanvas.height / 2;
+            var radius = ( oscCanvas.width + oscCanvas.height ) / 2;
+            var diagonalAngle = Math.atan2( oscCanvas.height, oscCanvas.width );
+
+            const topLeftToBottomRight = diagonalAngle;
+            const bottomRightToTopLeft = diagonalAngle - Math.PI;
+            const topRightToBottomLeft = -diagonalAngle;
+            const bottomLeftToTopRight = Math.PI - diagonalAngle;
+
             document.body.appendChild(oscCanvas);
 
             var canvasCtx = oscCanvas.getContext( "2d" );
@@ -63,8 +72,12 @@
             function resizeCanvas() {
                 oscCanvas.width = window.innerWidth;
                 oscCanvas.height = window.innerHeight;
+                centerX = oscCanvas.width / 2;
+                centerY = oscCanvas.height / 2;
+                radius = ( oscCanvas.width + oscCanvas.height ) / 2;
+                diagonalAngle = Math.atan2( oscCanvas.height, oscCanvas.width );
             }
-            resizeCanvas();
+            //resizeCanvas();
 
             window.addEventListener( 'resize', resizeCanvas );
             oscCanvas.addEventListener('click', () => {
@@ -90,15 +103,7 @@
             function renderMeter() {
                 requestAnimationFrame( renderMeter );
 
-                const centerX = oscCanvas.width / 2;
-                const centerY = oscCanvas.height / 2;
-                const radius = ( oscCanvas.width + oscCanvas.height ) / 2;
-                const diagonalAngle = Math.atan2( oscCanvas.height, oscCanvas.width ) - Math.PI;
 
-                const topLeftToBottomRight = diagonalAngle;
-                const bottomRightToTopLeft = diagonalAngle - Math.PI;
-                const topRightToBottomLeft = -diagonalAngle;
-                const bottomLeftToTopRight = Math.PI - diagonalAngle;
 
                 canvasCtx.clearRect( 0, 0, oscCanvas.width, oscCanvas.height );
 
