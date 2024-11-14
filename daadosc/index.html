@@ -57,11 +57,7 @@
             oscCanvas.width = window.innerHeight;
             oscCanvas.setAttribute( 'id', 'spectro' );
             var centerX, centerY, radius, diagonalAngle;
-
-            const topLeftToBottomRight = diagonalAngle;
-            const bottomRightToTopLeft = diagonalAngle - Math.PI;
-            const topRightToBottomLeft = -diagonalAngle;
-            const bottomLeftToTopRight = Math.PI - diagonalAngle;
+            var topLeftToBottomRight, bottomRightToTopLeft, topRightToBottomLeft, bottomLeftToTopRight;
 
             const rotationSpeed = 0.1;
 
@@ -79,6 +75,10 @@
                 centerY = oscCanvas.height / 2;
                 radius = ( oscCanvas.width + oscCanvas.height ) / 2;
                 diagonalAngle = Math.atan2( oscCanvas.height, oscCanvas.width );
+                topLeftToBottomRight = diagonalAngle;
+                bottomRightToTopLeft = diagonalAngle - Math.PI;
+                topRightToBottomLeft = -diagonalAngle;
+                bottomLeftToTopRight = Math.PI - diagonalAngle;
             }
             window.addEventListener( 'resize', resizeCanvas );
             resizeCanvas();
