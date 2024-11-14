@@ -118,6 +118,11 @@
                     if ( targetAngle > rotateAngle ) {
                         rotateAngle += rotationSpeed;
                     } else rotateAngle -= rotationSpeed;
+                    if ( Math.abs( rotateAngle - targetAngle ) < rotationSpeed ) {
+                        rotateAngle = targetAngle;
+                        //startColor = structuredClone( endColor );
+
+                    }
                     canvasCtx.rotate( rotateAngle );
                 }
                 
