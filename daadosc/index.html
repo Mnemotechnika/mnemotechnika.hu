@@ -51,6 +51,7 @@
             var audioSrc = null;
             var analyser = null;
             var frequencyData = [ 128, 128, 128, 128 ];
+            
             var oscCanvas = document.createElement( 'canvas' );
             oscCanvas.height = window.innerWidth;
             oscCanvas.width = window.innerHeight;
@@ -74,9 +75,9 @@
                 radius = ( oscCanvas.width + oscCanvas.height ) / 2;
                 diagonalAngle = Math.atan2( oscCanvas.height, oscCanvas.width );
             }
+            window.addEventListener( 'resize', resizeCanvas );
             resizeCanvas();
 
-            window.addEventListener( 'resize', resizeCanvas );
             oscCanvas.addEventListener('click', () => {
                 if ( music.paused ) {
                     if ( ( window.AudioContext || window.webkitAudioContext ) && music.src.length ) {
