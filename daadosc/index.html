@@ -71,9 +71,11 @@
             function resizeCanvas() {
                 oscCanvas.width = window.innerWidth;
                 oscCanvas.height = window.innerHeight;
+                
                 centerX = oscCanvas.width / 2;
                 centerY = oscCanvas.height / 2;
                 radius = ( oscCanvas.width + oscCanvas.height ) / 2;
+
                 diagonalAngle = Math.atan2( oscCanvas.height, oscCanvas.width );
                 topLeftToBottomRight = diagonalAngle;
                 bottomRightToTopLeft = diagonalAngle - Math.PI;
