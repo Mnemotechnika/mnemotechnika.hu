@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SVG Rotating Path Animation</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #121212;
+    }
+    svg {
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+      transform: translate(-50%, -50%);
+      left: 50%;
+      top: 50%;
+    }
+    path {
+      transform-origin: 0px 0px; /* Rotate around the origin */
+      will-change: transform; /* GPU acceleration hint */
+    }
+  </style>
+</head>
+<body>
+  <svg id="canvas" xmlns="http://www.w3.org/2000/svg" viewBox="-250 -250 500 500">
+  </svg>
+
+  <script>
+    const pathData = `M-11.6,-32.1
+      c0,0,26.4-3.9,61.2,24.4
+      c0,0-0.5-28.1,25.1-28.3
+      c25.6-0.3,22.9-6.8,30.2-13
+      c0,0-7.9,33.6-46.9,51.2
+      c0,0,28.2-4.9,45.8,24.2
+      c0,0-2.4-42.7,29.3-47.7
+      c18.7-2.9,27.2,49,14.1,64.5
+      c-31.6,37.1-62.6-45.2-3.2-87.7
+      c41.2-29.5,56.8-23.8,63.1-46.8
+      c5.6-19.9-17.7-47.9-37.1-29
+      c-48.4,47.1-31.2,83.6,10.3,126.8
+      c0,0-51.3-60.1-13.3-69.2
+      c48.5-11.6,25.2,78.9,25.2,78.9
+      s18.3-66.1,64.7-112.9
+      c0,0-56.4,53.9-10.2,163.2
+      c34.3,81.2,31.1,108.9-32.9,128.3
+      c-53.2,16.1-79.7-18-76.7-35.7`;
+
+    const canvas = document.getElementById("canvas");
+    const numCopies = 8; // Copies of each path
+    const numRotations = 8; // Number of rotations
+    const paths = [];
+
+    // Create the original and rotated paths
+    for (let rotation = 0; rotation < numRotations; rotation++) {
+      const angle = (360 / numRotations) * rotation; // Calculate rotation angle
+      for (let i = 0; i < numCopies; i++) {
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", pathData);
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke", `rgba(255, 255, 255, ${1 - i / numCopies})`);
+        path.setAttribute("stroke-width", 2);
+        canvas.appendChild(path);
+        paths.push({ path, copyIndex: i, angle });
+      }
+    }
+
+    function interpolateColor( start, end, factor ) {
+        return {
+            r: Math.round( start.r + ( end.r - start.r ) * factor ),
+            g: Math.round( start.g + ( end.g - start.g ) * factor ),
+            b: Math.round( start.b + ( end.b - start.b ) * factor ),
+            a: start.a + ( end.a - start.a ) * factor
+        };
+    }
+    var factor = 0;
+    var startColor = { r: 255, g: 255, b: 255, a: 1 };
+    var endColor = { r: 255, g: 0, b: 0, a: 1 };
+
+    // Mouse interaction using CSS transforms
+
+    let animationFrame;
+    document.addEventListener("mousemove", (e) => {
+        if (animationFrame) cancelAnimationFrame(animationFrame);
+        animationFrame = requestAnimationFrame(() => {
+            const { clientX: mouseX, clientY: mouseY } = e;
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const offsetX = (mouseX - centerX) * 0.02;
+            const offsetY = (mouseY - centerY) * 0.02;
+
+            paths.forEach(({ path, copyIndex, angle }) => {
+                const dx = offsetX * copyIndex;
+                const dy = offsetY * copyIndex;
+                const transform = `
+                    rotate(${angle}deg)
+                    translate(${dx}px, ${dy}px)
+                `;
+                path.style.transform = transform;
+
+                if ( JSON.stringify( startColor ) !== JSON.stringify( endColor ) ) {
+                    factor += 0.0001;
+                    const currentColor = interpolateColor( startColor, endColor, factor );
+                    if ( factor >= 1 ) {
+                        startColor = structuredClone( endColor );
+                        factor = 0;
+                    }
+                    path.style.stroke = `rgba( ${currentColor.r}, ${currentColor.g}, ${currentColor.b}, ${ (currentColor.a - ( copyIndex / numCopies ) ) } )`;
+                }
+
+                
+            });
+        });
+    });
+
+
+  </script>
+</body>
+</html>
