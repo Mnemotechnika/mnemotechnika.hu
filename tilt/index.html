@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phone Tilt Interaction</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f0f0f0;
+    }
+    .tilt-box {
+      width: 100px;
+      height: 100px;
+      background: #3498db;
+      border-radius: 10px;
+      position: absolute;
+    }
+  </style>
+</head>
+<body>
+  <div class="tilt-box"></div>
+
+  <script>
+    const tiltBox = document.querySelector('.tilt-box');
+
+    window.addEventListener('deviceorientation', (event) => {
+      const { beta, gamma } = event; // `beta` for front-back tilt, `gamma` for left-right tilt
+      
+      // Map beta and gamma to x and y positions
+      const x = Math.max(Math.min(gamma, 45), -45); // Constrain gamma values
+      const y = Math.max(Math.min(beta, 45), -45); // Constrain beta values
+      
+      const xPos = (window.innerWidth / 2) + (x * 10); // Scale gamma to position
+      const yPos = (window.innerHeight / 2) - (y * 10); // Scale beta to position
+      
+      tiltBox.style.transform = `translate(-50%, -50%) translate(${xPos}px, ${yPos}px)`;
+    });
+
+    // Show an alert if the DeviceOrientation API is not supported
+    if (!window.DeviceOrientationEvent) {
+      alert("Your device does not support the DeviceOrientation API.");
+    }
+  </script>
+</body>
+</html>
