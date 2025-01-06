@@ -32,6 +32,7 @@
     // Get the width of the text box
     const landscapeDiv = document.getElementById('landscape');
     const maxOffset = Math.min( 0, window.innerWidth - landscapeDiv.offsetWidth ); // Maximum allowable offset
+    console.log( window.innerWidth, landscapeDiv.offsetWidth );
 
     // Ensure accelerometer compatibility
     if (window.DeviceMotionEvent) {
