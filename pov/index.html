@@ -27,7 +27,13 @@
   <script>
     // Movement variables
     let offset = 0; // Initial horizontal offset
-    const sensitivity = 1; // Adjust sensitivity for a smoother experience
+    const sensitivity = 0.1; // Adjust sensitivity for a smoother experience
+
+    // Get the width of the text box
+    const landscapeDiv = document.getElementById('landscape');
+    const textWidth = landscapeDiv.offsetWidth;
+    const viewportWidth = window.innerWidth;
+    const maxOffset = Math.min(0, viewportWidth - textWidth); // Maximum allowable offset
 
     // Ensure accelerometer compatibility
     if (window.DeviceMotionEvent) {
@@ -39,13 +45,13 @@
           const deltaX = acceleration.x || 0;
 
           // Adjust the offset based on acceleration
-          offset += deltaX * sensitivity;
+          offset -= deltaX * sensitivity;
 
-          // Limit the movement to prevent over-scrolling
-          offset = Math.max(Math.min(offset, 0), -100); // Adjust based on your text width
+          // Limit the movement to the width of the text box
+          offset = Math.max(Math.min(offset, 0), maxOffset);
 
           // Apply the transform
-          document.getElementById('landscape').style.transform = `translateX(${offset}vw)`;
+          landscapeDiv.style.transform = `translateX(${offset}px)`;
         }
       });
     } else {
