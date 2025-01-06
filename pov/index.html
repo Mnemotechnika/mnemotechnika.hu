@@ -1,0 +1,57 @@
+// Ensure this code is included within an HTML file
+// Example: <div id="landscape"></div>
+
+// Add styles to make the text fill the screen height and moveable
+const style = document.createElement('style');
+style.textContent = `
+  #landscape {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 200vw; /* Adjust this based on your text width */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10vh; /* Text size relative to screen height */
+    white-space: nowrap;
+    background: black;
+    color: white;
+  }
+`;
+document.head.appendChild(style);
+
+// Create the div for the text
+const landscapeDiv = document.createElement('div');
+landscapeDiv.id = 'landscape';
+landscapeDiv.textContent = 'YOUR LARGE TEXT HERE'; // Replace with your desired text
+document.body.appendChild(landscapeDiv);
+
+// Movement variables
+let offset = 0; // Initial horizontal offset
+const sensitivity = 0.1; // Adjust sensitivity for a smoother experience
+
+// Ensure accelerometer compatibility
+if (window.DeviceMotionEvent) {
+  window.addEventListener('devicemotion', (event) => {
+    const acceleration = event.accelerationIncludingGravity;
+
+    if (acceleration) {
+      // Use the x-axis acceleration to move the text
+      const deltaX = acceleration.x || 0;
+
+      // Adjust the offset based on acceleration
+      offset -= deltaX * sensitivity;
+
+      // Limit the movement to prevent over-scrolling
+      offset = Math.max(Math.min(offset, 0), -100); // Adjust based on your text width
+
+      // Apply the transform
+      landscapeDiv.style.transform = `translateX(${offset}vw)`;
+    }
+  });
+} else {
+  alert('DeviceMotion is not supported on your device.');
+}
+
+// Note: Replace 'YOUR LARGE TEXT HERE' with your desired text content.
