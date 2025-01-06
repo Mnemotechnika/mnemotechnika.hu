@@ -19,11 +19,21 @@
       background: black;
       color: white;
     }
+    #accelerationDisplay {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 2vh;
+      color: white;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 5px;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body>
   <div id="landscape">YOUR LARGE TEXT HERE</div>
-
+  <div id="accelerationDisplay">Acceleration X: 0</div>
   <script>
     // Movement variables
     let offset = 0; // Initial horizontal offset
@@ -31,6 +41,7 @@
 
     // Get the width of the text box
     const landscapeDiv = document.getElementById('landscape');
+    const accelerationDisplay = document.getElementById('accelerationDisplay');
     const maxOffset = Math.min( 0, window.innerWidth - landscapeDiv.offsetWidth ); // Maximum allowable offset
     console.log( window.innerWidth, landscapeDiv.offsetWidth );
 
@@ -42,6 +53,9 @@
         if (acceleration) {
           // Use the x-axis acceleration to move the text
           const deltaX = acceleration.x || 0;
+          
+          // Update acceleration display
+          accelerationDisplay.textContent = `Acceleration X: ${deltaX.toFixed(2)}`;
 
           // Adjust the offset based on acceleration
           offset += deltaX * sensitivity;
