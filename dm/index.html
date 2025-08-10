@@ -37,7 +37,7 @@
   let tx=0, ty=0;
   addEventListener("mousemove", e => { tx=(e.clientX/innerWidth-0.5)*20; ty=(e.clientY/innerHeight-0.5)*20; });
   addEventListener("deviceorientation", e => {
-    const nx=(e.gamma ?? 0)/45, ny=(e.beta ?? 0)/45; tx=nx*200; ty=ny*200;
+    const nx=(e.gamma ?? 0)/45, ny=(e.beta ?? 0)/45; tx=nx*20; ty=ny*20;
   }, true);
 
   app.ticker.add(() => {
