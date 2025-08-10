@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>Depth Map Parallax + Blur</title>
+<style>
+  body { margin: 0; background: black; overflow: hidden; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<script type="module">
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js";
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.position.z = 2;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const loader = new THREE.TextureLoader();
+const [imageTexture, depthTexture] = await Promise.all([
+  loader.loadAsync("pic.jpg"), // fő kép
+  loader.loadAsync("dm_smooth.png")   // depth map
+]);
+
+imageTexture.minFilter = THREE.LinearFilter;
+depthTexture.minFilter = THREE.LinearFilter;
+
+let mesh;
+function createMesh() {
+  if (mesh) scene.remove(mesh);
+
+  const imgAspect = imageTexture.image.width / imageTexture.image.height;
+  const scrAspect = window.innerWidth / window.innerHeight;
+
+  let planeWidth, planeHeight;
+  if (scrAspect > imgAspect) {
+    planeHeight = 1.8;
+    planeWidth = planeHeight * imgAspect;
+  } else {
+    planeWidth = 1.8;
+    planeHeight = planeWidth / imgAspect;
+  }
+
+  const uniforms = {
+    uImage: { value: imageTexture },
+    uDepth: { value: depthTexture },
+    uMouse: { value: new THREE.Vector2(0.0, 0.0) },
+    uStrength: { value: 0.05 },
+    uFocus: { value: 0.5 },   // fókusz mélység (0-1)
+    uBlurMax: { value: 0.005 } // max blur mértéke
+  };
+
+  const material = new THREE.ShaderMaterial({
+    uniforms,
+    vertexShader: `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec2 vUv;
+      uniform sampler2D uImage;
+      uniform sampler2D uDepth;
+      uniform vec2 uMouse;
+      uniform float uStrength;
+      uniform float uFocus;
+      uniform float uBlurMax;
+
+      vec4 getBlurColor(vec2 uv, float blurSize) {
+        vec4 col = vec4(0.0);
+        col += texture2D(uImage, uv + vec2(-blurSize, -blurSize));
+        col += texture2D(uImage, uv + vec2( blurSize, -blurSize));
+        col += texture2D(uImage, uv + vec2(-blurSize,  blurSize));
+        col += texture2D(uImage, uv + vec2( blurSize,  blurSize));
+        return col * 0.25;
+      }
+
+      void main() {
+        float depth = texture2D(uDepth, vUv).r;
+        vec2 offset = uMouse * (depth - 0.5) * uStrength;
+
+        // blur mértéke a fókuszhoz képest
+        float blurAmount = abs(depth - uFocus) * uBlurMax;
+
+        vec4 sharp = texture2D(uImage, vUv + offset);
+        vec4 blurred = getBlurColor(vUv + offset, blurAmount);
+
+        // mix a fókusz szerint
+        float blurFactor = smoothstep(0.0, 0.5, blurAmount / uBlurMax);
+        gl_FragColor = mix(sharp, blurred, blurFactor);
+      }
+    `
+  });
+
+  const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+  mesh = new THREE.Mesh(geometry, material);
+  scene.add(mesh);
+}
+
+createMesh();
+
+let targetMouse = new THREE.Vector2(0, 0);
+window.addEventListener("mousemove", (e) => {
+  const x = (e.clientX / window.innerWidth) - 0.5;
+  const y = (e.clientY / window.innerHeight) - 0.5;
+  targetMouse.set(x, -y);
+});
+
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  createMesh();
+});
+
+function animate() {
+  if (mesh) {
+    mesh.material.uniforms.uMouse.value.lerp(targetMouse, 0.05);
+  }
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>
