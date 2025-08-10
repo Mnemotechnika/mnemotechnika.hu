@@ -1,0 +1,47 @@
+<script type="module">
+  import {
+    Application, Assets, Sprite, WRAP_MODES, DisplacementFilter
+  } from "https://cdn.jsdelivr.net/npm/pixi.js@8.12.0/dist/pixi.mjs";
+
+  const app = new Application();
+  await app.init({ resizeTo: window, background: "#000" });
+  document.body.style.margin = "0";
+  document.body.style.padding = "0";
+  document.body.appendChild(app.canvas);
+
+  const [photoTex, depthTex] = await Promise.all([
+    Assets.load("pic.jpg"),
+    Assets.load("dm.jpg"),
+  ]);
+
+  const photo = new Sprite(photoTex);
+  photo.anchor.set(0.5);
+  function layout(){
+    photo.x = app.screen.width/2;
+    photo.y = app.screen.height/2;
+    const s = Math.max(app.screen.width/photoTex.width, app.screen.height/photoTex.height);
+    photo.scale.set(s);
+  }
+  layout(); addEventListener("resize", layout);
+  app.stage.addChild(photo);
+
+  const dispSprite = new Sprite(depthTex);
+  dispSprite.texture.baseTexture.wrapMode = WRAP_MODES.REPEAT;
+  dispSprite.anchor.set(0.5);
+  dispSprite.position.set(app.screen.width/2, app.screen.height/2);
+  app.stage.addChild(dispSprite);
+
+  const dispFilter = new DisplacementFilter(dispSprite);
+  photo.filters = [dispFilter];
+
+  let tx=0, ty=0;
+  addEventListener("mousemove", e => { tx=(e.clientX/innerWidth-0.5)*20; ty=(e.clientY/innerHeight-0.5)*20; });
+  addEventListener("deviceorientation", e => {
+    const nx=(e.gamma ?? 0)/45, ny=(e.beta ?? 0)/45; tx=nx*200; ty=ny*200;
+  }, true);
+
+  app.ticker.add(() => {
+    dispFilter.scale.x += (tx - dispFilter.scale.x) * 0.1;
+    dispFilter.scale.y += (ty - dispFilter.scale.y) * 0.1;
+  });
+</script>
