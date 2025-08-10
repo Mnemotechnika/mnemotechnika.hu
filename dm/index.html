@@ -1,6 +1,6 @@
 <script type="module">
   import {
-    Application, Assets, Sprite, WRAP_MODES, DisplacementFilter
+    Application, Assets, Sprite, DisplacementFilter
   } from "https://cdn.jsdelivr.net/npm/pixi.js@8.12.0/dist/pixi.mjs";
 
   const app = new Application();
@@ -17,31 +17,67 @@
   const photo = new Sprite(photoTex);
   photo.anchor.set(0.5);
   function layout(){
-    photo.x = app.screen.width/2;
-    photo.y = app.screen.height/2;
-    const s = Math.max(app.screen.width/photoTex.width, app.screen.height/photoTex.height);
+    photo.x = app.screen.width / 2;
+    photo.y = app.screen.height / 2;
+    const s = Math.max(app.screen.width / photoTex.width, app.screen.height / photoTex.height);
     photo.scale.set(s);
   }
-  layout(); addEventListener("resize", layout);
+  layout();
+  addEventListener("resize", layout);
   app.stage.addChild(photo);
 
   const dispSprite = new Sprite(depthTex);
-  dispSprite.texture.baseTexture.wrapMode = WRAP_MODES.REPEAT;
+  dispSprite.texture.source.style.addressMode = 'repeat'; // v8 API
   dispSprite.anchor.set(0.5);
-  dispSprite.position.set(app.screen.width/2, app.screen.height/2);
+  dispSprite.position.set(app.screen.width / 2, app.screen.height / 2);
+  dispSprite.width  = app.screen.width;
+  dispSprite.height = app.screen.height;
+  dispSprite.visible = false;
   app.stage.addChild(dispSprite);
 
   const dispFilter = new DisplacementFilter(dispSprite);
   photo.filters = [dispFilter];
 
-  let tx=0, ty=0;
-  addEventListener("mousemove", e => { tx=(e.clientX/innerWidth-0.5)*20; ty=(e.clientY/innerHeight-0.5)*20; });
+  // --- Rugós mozgás ---
+  let targetX = 0, targetY = 0;
+  let velX = 0, velY = 0;
+  const stiffness = 0.1;
+  const damping = 0.8;
+
+  addEventListener("mousemove", e => {
+    const nx = (e.clientX / innerWidth  - 0.5);
+    const ny = (e.clientY / innerHeight - 0.5);
+    targetX = nx * 10;
+    targetY = ny * 10;
+  });
+
   addEventListener("deviceorientation", e => {
-    const nx=(e.gamma ?? 0)/45, ny=(e.beta ?? 0)/45; tx=nx*20; ty=ny*20;
+    const nx = (e.gamma ?? 0) / 45;
+    const ny = (e.beta  ?? 0) / 45;
+    targetX = nx * 10;
+    targetY = ny * 10;
   }, true);
 
   app.ticker.add(() => {
-    dispFilter.scale.x += (tx - dispFilter.scale.x) * 0.1;
-    dispFilter.scale.y += (ty - dispFilter.scale.y) * 0.1;
+    velX += (targetX - dispFilter.scale.x) * stiffness;
+    velY += (targetY - dispFilter.scale.y) * stiffness;
+    velX *= damping;
+    velY *= damping;
+
+    dispFilter.scale.x += velX;
+    dispFilter.scale.y += velY;
+
+    // --- Parallax + 3D-hatás ---
+    const px = dispFilter.scale.x * 0.05;
+    const py = dispFilter.scale.y * 0.05;
+
+    photo.x = app.screen.width  / 2 - px;
+    photo.y = app.screen.height / 2 - py;
+
+    // Enyhe forgatás
+    photo.rotation = dispFilter.scale.x * 0.002;
+
+    // Enyhe perspektíva torzítás (skew)
+    photo.skew.set(dispFilter.scale.x * 0.0008, -dispFilter.scale.y * 0.0008);
   });
 </script>
