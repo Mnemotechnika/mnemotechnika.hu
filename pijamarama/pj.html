@@ -1,0 +1,43 @@
+
+<!DOCTYPE html>
+<html lang="hu">
+    <head>
+        <meta charset="UTF-8">
+        <title>Pijamarama – fő scroll vezérli (JS fallback)</title>
+        <style>
+        :root {
+        --size: 256px;
+        --tile: 3px;
+        }
+
+        body {
+        margin: 0;
+        background: black;
+        color: #eee;
+        }
+        .anim {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAABQklEQVR4nO2a0Q3DIAxEaXdgpQydlbxEP1ARSkhKUp/NRX5/bSW4C7Y5qUkpCILAkxduaRFpP+acEbu8EYumnfruN/MiIl0DHB5OhBJ4+ClR3QOqB8wIA97QG9CHewoVLO8BVJToakWkCVQP7LWCshAcdN3TT6Ew4E0Y8CYMeHPNwGai6w74uppPXrod4Mqvc4W8Vs3GgLpcbA/sS64kIsVcpGmgPt2qb+oAN1gMRz3g3KmD28uXwWUvLQ6nHhFlnG47AQrEgGUN6Bso6s3mj7IBY/UJcQ8Yz341Ay7qk5YBL/VJ8QS8UoOCgZORbzBPFQz4JjZgnDa7jLHMkszuwdEDI1Ceg02chv/BQdnH7VPnK55nqqdxQiO0i8s7Qp0ptCwLetd/WNcVu8FR6XNUF3cT07wK0eWB6l2Gkhrc6gs2ij+F7C6k2OKCAgAAAABJRU5ErkJggg==");
+            background-repeat: repeat;
+            opacity: 0.5;
+        }
+
+        .wrap {
+            position: relative;
+            background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAJ0lEQVR4nF2KsQ0AAAjCiv//jBMJykTaCjB3mpyCDnTLqUKReiUACwVbBQgR4+vgAAAAAElFTkSuQmCC");
+            background-repeat: repeat;
+            min-height: 300vh;
+        }
+
+        </style>
+    </head>
+    <body>
+        <div class="anim"></div>
+        <div class="wrap"></div>
+    </body>
+</html>
+
+

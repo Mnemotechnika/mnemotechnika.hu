@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8" />
+<title>Foszfén – AMBYSS stílus</title>
+<style>
+  body {
+    margin: 0;
+    background: black;
+    overflow: hidden;
+    font-family: system-ui, sans-serif;
+  }
+  canvas {
+    display: block;
+  }
+</style>
+</head>
+<body>
+<canvas id="phosphene"></canvas>
+
+<script>
+const canvas = document.getElementById("phosphene");
+const ctx = canvas.getContext("2d");
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener("resize", resize);
+resize();
+
+// Paraméterek
+const RINGS = 40;           // hány koncentrikus gyűrű
+const NOISE_STRENGTH = 0.12; // mennyi "remegés"
+let startTime = performance.now();
+
+function rnd(seed) {
+  // determinisztikus pseudo-random (nem muszáj tökéletes)
+  return Math.sin(seed * 127.1) * 43758.5453 % 1;
+}
+
+function drawFrame(now) {
+  const t = (now - startTime) * 0.001; // másodperc
+
+  const w = canvas.width;
+  const h = canvas.height;
+  const cx = w / 2;
+  const cy = h / 2;
+  const maxRadius = Math.min(w, h) * 0.6;
+
+  // enyhe utánhúzás, nem teljes törlés – foszfenes "emlék"
+  ctx.globalCompositeOperation = "source-over";
+  ctx.globalAlpha = 0.25;
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.globalAlpha = 1.0;
+  ctx.globalCompositeOperation = "lighter";
+
+  // központi "lélegzés"
+  const breathing = 0.08 * Math.sin(t * 1.2);
+
+  for (let i = 0; i < RINGS; i++) {
+    const f = i / (RINGS - 1); // 0..1
+
+    // alap sugár + pulzálás
+    let radius = f * maxRadius;
+    const localPulse = 0.18 * Math.sin(t * 2.2 + f * 8.0);
+    radius *= 1.0 + breathing + localPulse * 0.1;
+
+    // "zaj", kis remegés a gyűrűn
+    const noisePhase = t * 0.8 + f * 10.0;
+    const jitter = NOISE_STRENGTH * (rnd(noisePhase) - 0.5);
+    radius *= 1.0 + jitter;
+
+    // fényerő + átlátszóság: közép és bizonyos sávok kiemelődnek
+    const band = Math.sin(f * Math.PI * 4.0 + t * 1.5);
+    const intensity = Math.max(0, band);
+
+    if (intensity < 0.02) continue;
+
+    const alpha = 0.04 + intensity * 0.18;
+
+    // szín: folyamatosan eltolódó hue, kicsi spektrális szórás
+    const hueBase = (t * 12 + f * 240) % 360;
+    const hue = (hueBase + band * 40) % 360;
+    const sat = 80 + intensity * 20; // 80–100%
+    const light = 35 + intensity * 35; // 35–70%
+
+    ctx.save();
+    ctx.translate(cx, cy);
+
+    // enyhe forgás az egész struktúrán
+    const globalRot = t * 0.05;
+    ctx.rotate(globalRot);
+
+    ctx.lineWidth = maxRadius * 0.02 + f * maxRadius * 0.03;
+    ctx.strokeStyle = `hsla(${hue}, ${sat}%, ${light}%, ${alpha})`;
+
+    // árnyék, hogy “izzon”
+    ctx.shadowBlur = 30 + intensity * 40;
+    ctx.shadowColor = `hsla(${hue}, ${sat}%, ${light + 10}%, ${alpha})`;
+
+    // gyűrű rajzolása (teljes kör)
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  // apró véletlenszerű "szikrák" a központ körül
+  for (let i = 0; i < 20; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const r = Math.random() * maxRadius * 0.25;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    const sparkHue = (t * 40 + r * 5) % 360;
+
+    ctx.globalAlpha = 0.1;
+    ctx.fillStyle = `hsla(${sparkHue}, 90%, 70%, 0.8)`;
+    ctx.beginPath();
+    ctx.arc(x, y, 1.5 + Math.random() * 2.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  requestAnimationFrame(drawFrame);
+}
+
+requestAnimationFrame(drawFrame);
+</script>
+</body>
+</html>
