@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>POV TISZA v4</title>
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      color: #fff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      touch-action: none;
+    }
+    #app { position: fixed; inset: 0; background: #000; }
+    canvas { display: block; width: 100vw; height: 100vh; background: #000; }
+    #overlay {
+      position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.93); z-index: 10; padding: 24px; box-sizing: border-box;
+    }
+    #panel { max-width: 620px; text-align: center; line-height: 1.45; }
+    h1 { margin: 0 0 12px; font-size: 28px; letter-spacing: 0.08em; }
+    p { margin: 8px 0; opacity: 0.92; }
+    button {
+      margin-top: 16px; border: 1px solid #666; background: #fff; color: #000;
+      padding: 14px 22px; font-size: 18px; border-radius: 12px; cursor: pointer;
+    }
+    #status {
+      position: fixed; left: 12px; bottom: 12px; font-size: 12px; color: rgba(255,255,255,0.78);
+      z-index: 5; white-space: pre-line; user-select: none; line-height: 1.35;
+      background: rgba(0,0,0,0.45); padding: 8px 10px; border-radius: 10px;
+      max-width: calc(100vw - 24px);
+    }
+    #hint {
+      position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+      font-size: 12px; color: rgba(255,255,255,0.82); z-index: 5; text-align: center;
+      background: rgba(0,0,0,0.35); padding: 8px 10px; border-radius: 10px;
+      max-width: calc(100vw - 24px);
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <canvas id="c"></canvas>
+    <div id="hint">Lengetés közben minden fél lengésnél újra kirajzol. Ha kell, húzd az ujjad gyorsan jobbra-balra teszthez.</div>
+    <div id="status"></div>
+  </div>
+
+  <div id="overlay">
+    <div id="panel">
+      <h1>POV – TISZA v4</h1>
+      <p>Javított ismétlődő triggerelés. Nem csak egyszer villan, hanem minden fél lengésnél újraindul a felirat.</p>
+      <p>Indítás után tartsd nyugalomban kb. 1 másodpercig, aztán lengetheted.</p>
+      <button id="startBtn">Indítás</button>
+    </div>
+  </div>
+
+  <script>
+    const FONT = {
+      "T": ["11111","00100","00100","00100","00100","00100","00100","00000"],
+      "I": ["11111","00100","00100","00100","00100","00100","11111","00000"],
+      "S": ["01110","10001","10000","01110","00001","10001","01110","00000"],
+      "Z": ["11111","00001","00010","00100","01000","10000","11111","00000"],
+      "A": ["01110","10001","10001","11111","10001","10001","10001","00000"],
+      " ": ["0","0","0","0","0","0","0","0"]
+    };
+
+    const TARGET_HALF_SWING_MS = 250;
+    const DEAD_ZONE = 0.55;
+    const TRIGGER_LEVEL = 1.2;
+    const MIN_HALF_SWING = 90;
+    const MAX_HALF_SWING = 700;
+    const RETRIGGER_COOLDOWN = 90;
+
+    const TEXT = "TISZA";
+    const canvas = document.getElementById("c");
+    const ctx = canvas.getContext("2d", { alpha: false });
+    const overlay = document.getElementById("overlay");
+    const startBtn = document.getElementById("startBtn");
+    const statusEl = document.getElementById("status");
+
+    let running = false;
+    let wakeLock = null;
+    let motionSeen = false;
+    let sensorMode = "nincs";
+    let permissionInfo = "";
+    let lastSensorAt = 0;
+
+    let baseline = 0;
+    let calibrating = true;
+    let calibrationSamples = [];
+
+    let filtered = 0;
+    let chosenRaw = 0, chosenFiltered = 0, chosenCentered = 0;
+    let rawAccX = 0, rawAccY = 0, rawAccZ = 0;
+    let rawRotA = 0, rawRotB = 0, rawRotG = 0;
+
+    let armed = false;
+    let currentSide = 0;
+    let lastTriggerTime = 0;
+    let lastHalfSwing = TARGET_HALF_SWING_MS;
+    let direction = 0;
+
+    let swingActive = false;
+    let swingStart = 0;
+    let swingDuration = TARGET_HALF_SWING_MS;
+    let displayDirection = 1;
+
+    let pointerDown = false;
+    let lastPointerX = 0;
+    let lastPointerT = 0;
+
+    function buildColumns(text) {
+      const rows = 8;
+      const columns = [];
+      const chars = text.toUpperCase().split("");
+      chars.forEach((ch, index) => {
+        const glyph = FONT[ch] || FONT[" "];
+        const width = glyph[0].length;
+        for (let x = 0; x < width; x++) {
+          const col = [];
+          for (let y = 0; y < rows; y++) col.push(glyph[y][x] === "1" ? 1 : 0);
+          columns.push(col);
+        }
+        if (index < chars.length - 1) columns.push(new Array(rows).fill(0));
+      });
+      return columns;
+    }
+
+    const messageColumns = buildColumns(TEXT);
+
+    function resize() {
+      const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+      canvas.width = Math.floor(window.innerWidth * dpr);
+      canvas.height = Math.floor(window.innerHeight * dpr);
+      canvas.style.width = window.innerWidth + "px";
+      canvas.style.height = window.innerHeight + "px";
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+    }
+
+    function drawColumn(column) {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, w, h);
+
+      const pixelSize = Math.max(12, Math.floor(Math.min(w * 0.08, h * 0.08)));
+      const gap = Math.max(1, Math.floor(pixelSize * 0.12));
+      const stripeWidth = pixelSize;
+      const totalHeight = 8 * pixelSize + 7 * gap;
+      const x = Math.floor((w - stripeWidth) / 2);
+      const y0 = Math.floor((h - totalHeight) / 2);
+
+      ctx.fillStyle = "#fff";
+      for (let y = 0; y < 8; y++) {
+        if (column[y]) ctx.fillRect(x, y0 + y * (pixelSize + gap), stripeWidth, pixelSize);
+      }
+    }
+
+    function startSwing(now, newDirection, halfSwingMs) {
+      swingActive = true;
+      swingStart = now;
+      swingDuration = Math.max(130, Math.min(430, halfSwingMs || TARGET_HALF_SWING_MS));
+      displayDirection = newDirection;
+      direction = newDirection;
+      lastTriggerTime = now;
+    }
+
+    function processSignal(now, value) {
+      const alpha = 0.22;
+      filtered = filtered * (1 - alpha) + value * alpha;
+      const centered = filtered - baseline;
+      chosenFiltered = filtered;
+      chosenCentered = centered;
+
+      if (Math.abs(centered) < DEAD_ZONE) {
+        armed = true;
+      }
+
+      let side = 0;
+      if (centered >= TRIGGER_LEVEL) side = 1;
+      else if (centered <= -TRIGGER_LEVEL) side = -1;
+
+      if (armed && side !== 0) {
+        const dt = now - lastTriggerTime;
+        if (dt >= RETRIGGER_COOLDOWN) {
+          const half = (lastTriggerTime > 0) ? dt : TARGET_HALF_SWING_MS;
+          if (half >= MIN_HALF_SWING && half <= MAX_HALF_SWING) {
+            lastHalfSwing = half;
+          }
+          startSwing(now, side, lastHalfSwing);
+          armed = false;
+          currentSide = side;
+        }
+      } else if (side !== 0) {
+        currentSide = side;
+      }
+    }
+
+    function getSensorValue(event) {
+      const acc = event.accelerationIncludingGravity || event.acceleration || {};
+      const rot = event.rotationRate || {};
+
+      rawAccX = typeof acc.x === "number" ? acc.x : 0;
+      rawAccY = typeof acc.y === "number" ? acc.y : 0;
+      rawAccZ = typeof acc.z === "number" ? acc.z : 0;
+      rawRotA = typeof rot.alpha === "number" ? rot.alpha : 0;
+      rawRotB = typeof rot.beta === "number" ? rot.beta : 0;
+      rawRotG = typeof rot.gamma === "number" ? rot.gamma : 0;
+
+      const candidates = [
+        { mode: "gyro γ", value: rawRotG / 12 },
+        { mode: "gyro β", value: rawRotB / 12 },
+        { mode: "gyro α", value: rawRotA / 12 },
+        { mode: "acc x", value: rawAccX },
+        { mode: "acc y", value: rawAccY },
+        { mode: "acc z", value: rawAccZ }
+      ];
+
+      candidates.sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
+      return candidates[0] || { mode: "nincs", value: 0 };
+    }
+
+    function onMotion(event) {
+      const now = performance.now();
+      const pick = getSensorValue(event);
+
+      motionSeen = true;
+      sensorMode = pick.mode;
+      lastSensorAt = now;
+      chosenRaw = pick.value;
+
+      if (calibrating) {
+        calibrationSamples.push(pick.value);
+        if (calibrationSamples.length >= 20) {
+          baseline = calibrationSamples.reduce((a, b) => a + b, 0) / calibrationSamples.length;
+          calibrating = false;
+          armed = true;
+        }
+        return;
+      }
+
+      processSignal(now, pick.value);
+    }
+
+    function manualSwing(dir) {
+      const now = performance.now();
+      startSwing(now, dir, TARGET_HALF_SWING_MS);
+      armed = true;
+    }
+
+    function onPointerDown(e) {
+      pointerDown = true;
+      lastPointerX = e.clientX;
+      lastPointerT = performance.now();
+    }
+
+    function onPointerMove(e) {
+      if (!pointerDown) return;
+      const now = performance.now();
+      const dx = e.clientX - lastPointerX;
+      const dt = now - lastPointerT;
+      if (Math.abs(dx) > 35 && dt < 250) {
+        manualSwing(dx > 0 ? 1 : -1);
+        lastPointerX = e.clientX;
+        lastPointerT = now;
+      }
+    }
+
+    function onPointerUp() {
+      pointerDown = false;
+    }
+
+    function fmt(n) {
+      return (Math.round(n * 100) / 100).toFixed(2);
+    }
+
+    function animate(now) {
+      if (!running) return;
+
+      let column = new Array(8).fill(0);
+
+      if (swingActive) {
+        const elapsed = now - swingStart;
+        const progress = elapsed / swingDuration;
+        if (progress >= 0 && progress <= 1) {
+          let idx = Math.floor(progress * messageColumns.length);
+          idx = Math.max(0, Math.min(messageColumns.length - 1, idx));
+          if (displayDirection < 0) idx = messageColumns.length - 1 - idx;
+          column = messageColumns[idx];
+        } else {
+          swingActive = false;
+        }
+      }
+
+      drawColumn(column);
+
+      const age = lastSensorAt ? Math.round(now - lastSensorAt) : -1;
+      statusEl.textContent = [
+        `szenzor: ${sensorMode}`,
+        `engedély: ${permissionInfo || "ismeretlen"}`,
+        `kalibrálás: ${calibrating ? "igen" : "nem"}`,
+        `armed: ${armed ? "igen" : "nem"}`,
+        `fél-lengés: ${Math.round(lastHalfSwing)} ms`,
+        `irány: ${direction > 0 ? "jobb" : direction < 0 ? "bal" : "-"}`,
+        `kapott adat: ${motionSeen ? "igen" : "nem"}${age >= 0 ? " (" + age + " ms)" : ""}`,
+        `kiválasztott nyers: ${fmt(chosenRaw)}`,
+        `kiválasztott szűrt: ${fmt(chosenFiltered)}`,
+        `kiválasztott középhez: ${fmt(chosenCentered)}`,
+        `acc x/y/z: ${fmt(rawAccX)} / ${fmt(rawAccY)} / ${fmt(rawAccZ)}`,
+        `gyro α/β/γ: ${fmt(rawRotA)} / ${fmt(rawRotB)} / ${fmt(rawRotG)}`
+      ].join("\n");
+
+      requestAnimationFrame(animate);
+    }
+
+    async function requestMotionPermission() {
+      try {
+        if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
+          permissionInfo = await DeviceMotionEvent.requestPermission();
+        } else {
+          permissionInfo = "automatikus / nincs kérés";
+        }
+      } catch (_) {
+        permissionInfo = "hiba";
+      }
+    }
+
+    async function requestFullscreen() {
+      try {
+        if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+        }
+      } catch (_) {}
+    }
+
+    async function requestWakeLock() {
+      try {
+        if ("wakeLock" in navigator) {
+          wakeLock = await navigator.wakeLock.request("screen");
+        }
+      } catch (_) {}
+    }
+
+    async function start() {
+      resize();
+      calibrating = true;
+      calibrationSamples = [];
+      baseline = 0;
+      filtered = 0;
+      chosenFiltered = 0;
+      chosenCentered = 0;
+      armed = false;
+      currentSide = 0;
+      direction = 0;
+      lastTriggerTime = 0;
+      lastHalfSwing = TARGET_HALF_SWING_MS;
+
+      await requestMotionPermission();
+      await requestFullscreen();
+      await requestWakeLock();
+
+      window.addEventListener("devicemotion", onMotion, { passive: true });
+      window.addEventListener("resize", resize);
+      window.addEventListener("pointerdown", onPointerDown, { passive: true });
+      window.addEventListener("pointermove", onPointerMove, { passive: true });
+      window.addEventListener("pointerup", onPointerUp, { passive: true });
+      window.addEventListener("pointercancel", onPointerUp, { passive: true });
+
+      document.addEventListener("visibilitychange", async () => {
+        if (document.visibilityState === "visible") await requestWakeLock();
+      });
+
+      running = true;
+      overlay.style.display = "none";
+      requestAnimationFrame(animate);
+    }
+
+    startBtn.addEventListener("click", start);
+    resize();
+    drawColumn(new Array(8).fill(0));
+  </script>
+</body>
+</html>
