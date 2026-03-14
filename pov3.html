@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+body{
+margin:0;
+background:black;
+overflow:hidden;
+touch-action:manipulation;
+font-family:sans-serif;
+}
+
+#mask{
+position:fixed;
+left:50%;
+top:0;
+width:22px;
+height:100vh;
+transform:translateX(-50%);
+overflow:hidden;
+}
+
+#text{
+position:absolute;
+white-space:nowrap;
+font-size:260px;
+font-weight:900;
+color:white;
+animation:scroll 0.5s linear infinite;
+will-change:transform;
+}
+
+#hud{
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+color:white;
+font-size:14px;
+background:rgba(0,0,0,0.4);
+padding:8px 14px;
+border-radius:12px;
+}
+
+#hint{
+position:fixed;
+top:20px;
+left:50%;
+transform:translateX(-50%);
+font-size:13px;
+color:#ccc;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="mask">
+<div id="text">
+TISZA&nbsp;&nbsp;&nbsp;TISZA&nbsp;&nbsp;&nbsp;TISZA&nbsp;&nbsp;&nbsp;TISZA&nbsp;&nbsp;&nbsp;TISZA
+</div>
+</div>
+
+<div id="hint">
+tap every swing
+</div>
+
+<div id="hud">
+waiting for taps
+</div>
+
+<script>
+
+let taps=[]
+let halfSwing=250
+
+const text=document.getElementById("text")
+const hud=document.getElementById("hud")
+
+function updateSpeed(ms){
+
+halfSwing=ms
+
+let duration=(halfSwing*2)/1000
+
+text.style.animationDuration=duration+"s"
+
+hud.innerText=
+"half swing "+Math.round(ms)+" ms"
+}
+
+document.body.addEventListener("touchstart",()=>{
+
+let t=performance.now()
+
+taps.push(t)
+
+if(taps.length>6)
+taps.shift()
+
+if(taps.length>=3){
+
+let intervals=[]
+
+for(let i=1;i<taps.length;i++)
+intervals.push(taps[i]-taps[i-1])
+
+let avg=
+intervals.reduce((a,b)=>a+b)/intervals.length
+
+// smoothing
+halfSwing=halfSwing*0.6 + avg*0.4
+
+updateSpeed(halfSwing)
+
+}
+
+})
+
+function goFullscreen(){
+
+if(document.documentElement.requestFullscreen)
+document.documentElement.requestFullscreen()
+
+}
+
+document.body.addEventListener("dblclick",goFullscreen)
+
+updateSpeed(halfSwing)
+
+</script>
+
+</body>
+</html>
