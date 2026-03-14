@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>POV TISZA strobo</title>
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      touch-action: manipulation;
+      font-family: system-ui, sans-serif;
+    }
+
+    body {
+      background: #000;
+    }
+
+    #mask {
+      position: fixed;
+      left: 50%;
+      top: 0;
+      width: 18px;
+      height: 100vh;
+      transform: translateX(-50%);
+      overflow: hidden;
+      background: #000;
+    }
+
+    #text {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      white-space: nowrap;
+      font-size: 240px;
+      line-height: 1;
+      font-weight: 900;
+      color: #fff;
+      will-change: transform, opacity;
+      text-rendering: geometricPrecision;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    #hud {
+      position: fixed;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      color: #fff;
+      background: rgba(0,0,0,0.45);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.35;
+      text-align: center;
+      white-space: pre-line;
+      z-index: 20;
+    }
+
+    #hint {
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.85);
+      background: rgba(0,0,0,0.35);
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      text-align: center;
+      z-index: 20;
+      max-width: calc(100vw - 24px);
+    }
+  </style>
+</head>
+<body>
+  <div id="hint">
+    Minden fordulásnál tappolj egyet. A villogás élesebbé teszi a POV képet.
+  </div>
+
+  <div id="mask">
+    <div id="text">TISZA&nbsp;&nbsp;&nbsp;TISZA&nbsp;&nbsp;&nbsp;TISZA&nbsp;&nbsp;&nbsp;TISZA&nbsp;&nbsp;&nbsp;TISZA</div>
+  </div>
+
+  <div id="hud">vár tapokra</div>
+
+  <script>
+    const text = document.getElementById("text");
+    const hud = document.getElementById("hud");
+
+    let taps = [];
+    let halfSwingMs = 250;
+    let smoothedHalfSwing = 250;
+
+    let textX = 0;
+    let lastNow = performance.now();
+
+    let loopWidth = 2000;
+
+    // strobo
+    let stroboEnabled = true;
+    let stroboHz = 90;          // villogás frekvencia
+    let duty = 0.38;            // bekapcsolt rész aránya 0..1
+
+    function updateMetrics() {
+      loopWidth = text.offsetWidth || 2000;
+    }
+
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function registerTap() {
+      const now = performance.now();
+      taps.push(now);
+      if (taps.length > 6) taps.shift();
+
+      if (taps.length >= 3) {
+        const intervals = [];
+        for (let i = 1; i < taps.length; i++) {
+          intervals.push(taps[i] - taps[i - 1]);
+        }
+
+        const avg = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+        halfSwingMs = clamp(avg, 120, 500);
+
+        // simítás
+        smoothedHalfSwing = smoothedHalfSwing * 0.6 + halfSwingMs * 0.4;
+      }
+    }
+
+    function getPixelsPerSecond() {
+      // egy fél lengés alatt végigfusson kb. a teljes használható szakaszon
+      return loopWidth / smoothedHalfSwing * 1000;
+    }
+
+    function updateHud() {
+      const cycleMs = Math.round(smoothedHalfSwing * 2);
+      hud.textContent =
+        `fél lengés: ${Math.round(smoothedHalfSwing)} ms
+teljes ciklus: ${cycleMs} ms
+strobo: ${stroboEnabled ? stroboHz + " Hz" : "ki"}
+duty: ${Math.round(duty * 100)}%`;
+    }
+
+    function updateStrobo(now) {
+      if (!stroboEnabled) {
+        text.style.opacity = "1";
+        return;
+      }
+
+      const period = 1000 / stroboHz;
+      const phase = now % period;
+      const onTime = period * duty;
+
+      text.style.opacity = phase < onTime ? "1" : "0";
+    }
+
+    function animate(now) {
+      const dt = Math.min(50, now - lastNow);
+      lastNow = now;
+
+      const speed = getPixelsPerSecond(); // px/s
+      textX -= speed * (dt / 1000);
+
+      if (Math.abs(textX) > loopWidth * 0.6) {
+        textX = 0;
+      }
+
+      text.style.transform = `translate(${textX}px, -50%)`;
+      updateStrobo(now);
+      updateHud();
+
+      requestAnimationFrame(animate);
+    }
+
+    document.body.addEventListener("touchstart", (e) => {
+      registerTap();
+    }, { passive: true });
+
+    document.body.addEventListener("click", () => {
+      registerTap();
+    });
+
+    window.addEventListener("resize", updateMetrics);
+
+    // opcionális gyorsbillentyű desktop teszthez
+    window.addEventListener("keydown", (e) => {
+      if (e.code === "Space") {
+        e.preventDefault();
+        registerTap();
+      }
+      if (e.key === "+") stroboHz = clamp(stroboHz + 5, 30, 144);
+      if (e.key === "-") stroboHz = clamp(stroboHz - 5, 30, 144);
+      if (e.key === "s") stroboEnabled = !stroboEnabled;
+      if (e.key === "[") duty = clamp(duty - 0.05, 0.1, 0.9);
+      if (e.key === "]") duty = clamp(duty + 0.05, 0.1, 0.9);
+    });
+
+    updateMetrics();
+    updateHud();
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>
