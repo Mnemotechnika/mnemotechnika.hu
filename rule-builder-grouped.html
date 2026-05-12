@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rule Builder Demo</title>
+<style>
+:root{
+  --bg:#111;
+  --line:#2a2a2a;
+  --text:#e8e8e8;
+  --muted:#9a9a9a;
+  --green:#58e83f;
+  --orange:#ffbf00;
+  --red:#ff3b30;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Consolas, "Courier New", monospace;
+  font-size:18px;
+}
+.app{
+  max-width:1400px;
+  margin:0 auto;
+  border-left:1px solid #222;
+  border-right:1px solid #222;
+  min-height:100vh;
+}
+.top,.search{
+  display:grid;
+  grid-template-columns:320px 1fr;
+}
+.top > div{
+  background:#1f7d20;
+  padding:16px 28px;
+  border-right:1px solid #0c340c;
+  border-bottom:1px solid #0c340c;
+}
+.search > div{
+  padding:16px 28px;
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  background:#151515;
+}
+.creator,.rule{
+  display:grid;
+  grid-template-columns:160px 260px 80px 1fr 70px;
+  align-items:center;
+  min-height:58px;
+  border-bottom:1px solid var(--line);
+}
+.creator{background:#141414}
+.creator > div,.rule > div{padding:10px 24px}
+select,input{
+  width:100%;
+  background:transparent;
+  color:var(--text);
+  border:0;
+  outline:none;
+  font:inherit;
+}
+select{cursor:pointer}
+input::placeholder{color:#777}
+.eq{text-align:center;color:var(--muted)}
+.btn{
+  cursor:pointer;
+  user-select:none;
+  text-align:center;
+  font-size:32px;
+  line-height:1;
+}
+.btn:hover{color:#fff}
+.add{color:var(--green)}
+.remove{color:#aaa}
+.action-extend{color:var(--green)}
+.action-constrain{color:var(--orange)}
+.action-omit{color:var(--red)}
+.menu-row{
+  min-height:52px;
+  padding:15px 28px;
+  border-bottom:1px solid var(--line);
+  background:#161616;
+}
+.people{display:grid;grid-template-columns:420px 1fr}
+.people > div{
+  min-height:52px;
+  padding:15px 28px;
+  border-bottom:1px solid var(--line);
+}
+.people.selected > div{background:#633516}
+.json-wrap{
+  padding:18px 24px;
+  border-top:1px solid var(--line);
+  background:#0e0e0e;
+}
+.json-title{color:#888;margin-bottom:10px}
+pre{
+  margin:0;
+  white-space:pre-wrap;
+  color:#9cff8f;
+  font-size:15px;
+  line-height:1.4;
+}
+.footer{
+  display:flex;
+  gap:12px;
+  justify-content:flex-end;
+  padding:18px 24px;
+  border-top:1px solid var(--line);
+}
+button{
+  background:#202020;
+  color:var(--text);
+  border:1px solid #333;
+  padding:10px 18px;
+  font:inherit;
+  cursor:pointer;
+}
+button:hover{background:#2a2a2a}
+button.primary{background:#1f7d20}
+@media(max-width:800px){
+  .top,.search{grid-template-columns:1fr}
+  .creator,.rule{grid-template-columns:110px 1fr 40px 1fr 44px}
+  .creator > div,.rule > div{padding:8px 10px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="creator">
+    <div>
+      <select id="action">
+        <option value="extend">extend</option>
+        <option value="constrain">constrain</option>
+        <option value="omit">omit</option>
+      </select>
+    </div>
+    <div>
+      <select id="parameter">
+        <option value="flag">flag</option>
+        <option value="event_code">event_code</option>
+        <option value="year">year</option>
+        <option value="status">status</option>
+      </select>
+    </div>
+    <div class="eq">=</div>
+    <div>
+      <input id="value" placeholder="value" autocomplete="off">
+    </div>
+    <div class="btn add" onclick="addRule()">+</div>
+  </div>
+
+  <div id="rules"></div>
+
+  <div class="json-wrap">
+    <div class="json-title">JSON export</div>
+    <pre id="json"></pre>
+  </div>
+
+  <div class="footer">
+    <button onclick="loadExample()">LOAD EXAMPLE</button>
+    <button onclick="resetRules()">RESET</button>
+    <button class="primary" onclick="downloadJson()">DOWNLOAD JSON</button>
+  </div>
+
+</div>
+
+<script>
+let rules = [];
+
+const exampleRules = [
+
+];
+
+function parseValue(value){
+  const trimmed = String(value).trim();
+  if(trimmed !== "" && !Number.isNaN(Number(trimmed))) return Number(trimmed);
+  return trimmed;
+}
+
+function addRule(){
+  const action = document.getElementById("action").value;
+  const parameter = document.getElementById("parameter").value;
+  const rawValue = document.getElementById("value").value;
+  const value = parseValue(rawValue);
+  if(value === "") return;
+  rules.push({ action, parameter, value });
+  document.getElementById("value").value = "";
+  render();
+}
+
+function removeRule(index){
+  rules.splice(index, 1);
+  render();
+}
+
+function buildExport(){
+  const result = [];
+
+  for(const rule of rules){
+    const lastBlock = result[result.length - 1];
+
+    const mustOpenNewBlock =
+      !lastBlock ||
+      lastBlock.action !== rule.action ||
+      Object.prototype.hasOwnProperty.call(lastBlock.search_fields, rule.parameter);
+
+    const block = mustOpenNewBlock
+      ? { action: rule.action, search_fields: {} }
+      : lastBlock;
+
+    if(mustOpenNewBlock) result.push(block);
+
+    block.search_fields[rule.parameter] = rule.value;
+  }
+
+  return result;
+}
+
+function render(){
+  const root = document.getElementById("rules");
+  root.innerHTML = "";
+
+  rules.forEach((rule, index) => {
+    const row = document.createElement("div");
+    row.className = "rule";
+    row.innerHTML = `
+      <div class="action-${rule.action}">${rule.action}</div>
+      <div>${escapeHtml(rule.parameter)}</div>
+      <div class="eq">=</div>
+      <div>${escapeHtml(rule.value)}</div>
+      <div class="btn remove" onclick="removeRule(${index})">x</div>
+    `;
+    root.appendChild(row);
+  });
+
+  document.getElementById("json").textContent =
+    JSON.stringify(buildExport(), null, 2);
+}
+
+function loadExample(){
+  rules = JSON.parse(JSON.stringify(exampleRules));
+  render();
+}
+
+function resetRules(){
+  rules = [];
+  render();
+}
+
+function downloadJson(){
+  const blob = new Blob([JSON.stringify(buildExport(), null, 2)], { type:"application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "rules.json";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function escapeHtml(value){
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+document.getElementById("value").addEventListener("keydown", event => {
+  if(event.key === "Enter") addRule();
+});
+
+loadExample();
+</script>
+</body>
+</html>
