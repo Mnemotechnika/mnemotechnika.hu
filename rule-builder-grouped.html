@@ -6,27 +6,22 @@
 <title>Rule Builder</title>
 
 <style>
-
 :root{
   --bg:#000;
   --panel:#303030;
   --line:#000;
   --text:#f0f0f0;
-
   --green:#2f8f2f;
   --orange:#8a5a1f;
   --red:#6b2020;
 }
 
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
   margin:0;
   background:var(--bg);
   color:var(--text);
-
   font-family:Consolas,"Courier New",monospace;
   font-size:28px;
   text-transform:uppercase;
@@ -45,62 +40,37 @@ body{
 
 .cell{
   min-height:86px;
-
   display:flex;
   align-items:center;
-
   background:var(--panel);
-
   border-right:3px solid var(--line);
   border-bottom:3px solid var(--line);
-
   padding:10px 20px;
 }
 
-.cell:last-child{
-  border-right:0;
-}
+.cell:last-child{border-right:0}
 
-.action{
-  justify-content:flex-start;
-}
+.action{justify-content:flex-start}
+.parameter{justify-content:flex-end}
+.value{justify-content:flex-start}
+.button{justify-content:flex-end;text-align:right}
 
-.parameter{
-  justify-content:flex-end;
-}
-
-.value{
-  justify-content:flex-start;
-}
-
-.button{
-  justify-content:flex-end;
-  text-align:right;
-}
-
-select,
-input,
-button{
+select,input,button{
   width:100%;
   height:100%;
-
   background:transparent;
   border:0;
   outline:none;
-
   color:var(--text);
-
   font:inherit;
   text-transform:uppercase;
 }
 
 select{
   cursor:pointer;
-
   appearance:none;
   -webkit-appearance:none;
   -moz-appearance:none;
-
   background-image:none;
 }
 
@@ -114,17 +84,10 @@ select option{
   text-align-last:right;
 }
 
-input{
-  text-align:left;
-}
+input{text-align:left}
+input::placeholder{color:#888}
 
-input::placeholder{
-  color:#888;
-}
-
-button{
-  cursor:pointer;
-}
+button{cursor:pointer}
 
 .button button{
   display:flex;
@@ -133,94 +96,51 @@ button{
   text-align:right;
 }
 
-button:hover{
-  background:#444;
-}
+button:hover{background:#444}
 
-.creator .action{
-  background:var(--green);
-}
+.creator .action{background:var(--green)}
+.rule.extend .action{background:var(--green)}
+.rule.constrain .action{background:var(--orange)}
+.rule.omit .action{background:var(--red)}
 
-.rule.extend .action{
-  background:var(--green);
-}
-
-.rule.constrain .action{
-  background:var(--orange);
-}
-
-.rule.omit .action{
-  background:var(--red);
-}
-
-.add{
-  background:#1d5f1d;
-}
-
-.remove{
-  background:#4b1b1b;
-}
-
-.remove:hover{
-  background:#6b2020;
-}
+.add{background:#1d5f1d}
+.remove{background:#4b1b1b}
+.remove:hover{background:#6b2020}
 
 .empty{
   min-height:86px;
-
   display:flex;
   align-items:center;
   justify-content:center;
-
   background:#222;
-
   border-bottom:3px solid var(--line);
-
   color:#777;
 }
 
 .json-title{
   min-height:70px;
-
   display:flex;
   align-items:center;
   justify-content:center;
-
   background:#333;
-
   border-bottom:3px solid var(--line);
 }
 
 pre{
   margin:0;
   padding:24px;
-
   background:#111;
   color:#8cff80;
-
   font-size:16px;
   line-height:1.5;
-
   white-space:pre-wrap;
 }
 
 @media(max-width:900px){
-
-  body{
-    font-size:18px;
-  }
-
-  .rule-row{
-    grid-template-columns:1fr 1fr 1fr 1fr;
-  }
-
-  .cell{
-    min-height:72px;
-    padding:8px;
-  }
-
+  body{font-size:18px}
+  .rule-row{grid-template-columns:1fr 1fr 1fr 1fr}
+  .cell{min-height:72px;padding:8px}
 }
-
 </style>
 </head>
 
@@ -248,74 +168,82 @@ pre{
     </div>
 
     <div class="cell value">
-      <input
-        id="value"
-        placeholder="VALUE"
-        autocomplete="off">
+      <input id="value" placeholder="VALUE" autocomplete="off">
     </div>
 
     <div class="cell button add">
-      <button type="button" onclick="addRule()">
-        ADD
-      </button>
+      <button type="button" onclick="addRule()">ADD</button>
     </div>
 
   </div>
 
   <div id="rules"></div>
 
-  <div class="json-title">
-    JSON EXPORT
-  </div>
-
+  <div class="json-title">JSON EXPORT</div>
   <pre id="json"></pre>
 
 </div>
 
 <script>
-
 let rules = [];
 
+function parseValue(value){
+  const trimmed = String(value).trim();
+  if(trimmed !== "" && !Number.isNaN(Number(trimmed))){
+    return Number(trimmed);
+  }
+  return trimmed;
+}
+
 function addRule(){
+  const action = document.getElementById("action").value;
+  const parameter = document.getElementById("parameter").value;
+  const rawValue = document.getElementById("value").value;
+  const value = parseValue(rawValue);
 
-  const action =
-    document.getElementById("action").value;
+  if(value === "") return;
 
-  const parameter =
-    document.getElementById("parameter").value;
-
-  const value =
-    document.getElementById("value").value.trim();
-
-  if(!value) return;
-
-  rules.push({
-    action,
-    parameter,
-    value
-  });
+  rules.push({ action, parameter, value });
 
   document.getElementById("value").value = "";
-
   render();
 }
 
 function removeRule(index){
-
   rules.splice(index,1);
-
   render();
 }
 
+function buildExport(){
+  const result = [];
+
+  for(const rule of rules){
+    const lastBlock = result[result.length - 1];
+
+    const mustOpenNewBlock =
+      !lastBlock ||
+      lastBlock.action !== rule.action ||
+      Object.prototype.hasOwnProperty.call(lastBlock.search_fields, rule.parameter);
+
+    const block = mustOpenNewBlock
+      ? { action: rule.action, search_fields:{} }
+      : lastBlock;
+
+    if(mustOpenNewBlock){
+      result.push(block);
+    }
+
+    block.search_fields[rule.parameter] = rule.value;
+  }
+
+  return result;
+}
+
 function render(){
-
-  const root =
-    document.getElementById("rules");
-
+  const root = document.getElementById("rules");
   root.innerHTML = "";
 
   if(rules.length === 0){
-
     root.innerHTML = `
       <div class="empty">
         NO RULES
@@ -324,15 +252,10 @@ function render(){
   }
 
   rules.forEach((rule,index)=>{
-
-    const row =
-      document.createElement("div");
-
-    row.className =
-      "rule-row rule " + rule.action;
+    const row = document.createElement("div");
+    row.className = "rule-row rule " + rule.action;
 
     row.innerHTML =
-
       '<div class="cell action">' +
         escapeHtml(rule.action) +
       '</div>' +
@@ -352,17 +275,14 @@ function render(){
       '</div>';
 
     root.appendChild(row);
-
   });
 
   document.getElementById("json").textContent =
-    JSON.stringify(rules,null,2);
+    JSON.stringify(buildExport(), null, 2);
 }
 
 function escapeHtml(value){
-
   return String(value)
-
     .replaceAll("&","&amp;")
     .replaceAll("<","&lt;")
     .replaceAll(">","&gt;")
@@ -370,18 +290,13 @@ function escapeHtml(value){
     .replaceAll("'","&#039;");
 }
 
-document
-.getElementById("value")
-.addEventListener("keydown",event=>{
-
+document.getElementById("value").addEventListener("keydown",event=>{
   if(event.key === "Enter"){
     addRule();
   }
-
 });
 
 render();
-
 </script>
 
 </body>
