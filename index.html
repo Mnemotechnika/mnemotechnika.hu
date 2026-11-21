@@ -20,22 +20,21 @@
 		#logo {
 			display: none;
 		}
-		#scene {
-			position: fixed;
-			overflow: hidden;
-		}
-		#stack, #stack div {
+		.screen {
 			position: absolute;
 			top: 0;
 			left: 0;
 			width: 100%;
 			height: 100%;
-			-webkit-transform-style: preserve-3d;
-			transform-style: preserve-3d;
-		}
-		#stack div {
+			overflow: hidden;
 			background-repeat: no-repeat;
 			background-position: center;
+		}
+		body > .screen {
+			position: fixed;
+		}
+		.screen .screen {
+			mix-blend-mode: screen;
 		}
 	</style>
 </head>
@@ -46,24 +45,20 @@
 		                        M5,1 h8 v12 h-8 v-2 h6 v-8 h-6 z"/>
 	</svg>
 
-	<div id="scene">
-		<div id="stack"></div>
-	</div>
-
 	<script>
 		var CONFIG = {
-			layers: 10,
-			spacing: 200,
-			perspective: 3000,
-			frontOpacity: 0.5,
-			backOpacity: 0.05,
-			size: 77.875,
-			extent: 140,
 			color: '#e99022',
-			sensitivity: 1,
-			friction: 0.1,
-			tiltBoost: 2,
-			tiltDivisor: 30
+			size: 109,
+			cameraDistance: 1.543,
+			cameraFov: 40,
+			cameraAngle: 0,
+			cameraLatency: 100,
+			cameraGain: 0.55,
+			aimSensitivity: 0.25,
+			tiltAim: 45,
+			touchTilt: 30,
+			wheelSensitivity: 0.05,
+			friction: 0.1
 		};
 
 		var logo = document.getElementById('logo');
@@ -71,36 +66,46 @@
 		var image = 'data:image/svg+xml,' + encodeURIComponent(new XMLSerializer().serializeToString(logo));
 		document.getElementById('favicon').href = image;
 
-		var scene = document.getElementById('scene');
-		scene.style.left = scene.style.top = (100 - CONFIG.extent) / 2 + '%';
-		scene.style.width = scene.style.height = CONFIG.extent + '%';
-		scene.style.webkitPerspective = scene.style.perspective = CONFIG.perspective + 'px';
-
-		var stack = document.getElementById('stack');
-		var layers = [];
-		for (var i = 0; i < CONFIG.layers; i++) {
-			var layer = document.createElement('div');
-			var depth = i / Math.max(CONFIG.layers - 1, 1);
-			layer.style.backgroundImage = 'url("' + image + '")';
-			layer.style.webkitTransform = layer.style.transform = 'translateZ(' + -i * CONFIG.spacing + 'px)';
-			layer.style.opacity = CONFIG.frontOpacity + (CONFIG.backOpacity - CONFIG.frontOpacity) * depth;
-			stack.appendChild(layer);
-			layers.push(layer);
+		var levels = Math.min(Math.ceil(Math.log(0.02) / Math.log(CONFIG.cameraGain)), 30);
+		var screens = [];
+		var parent = document.body;
+		for (var i = 0; i <= levels; i++) {
+			var screen = document.createElement('div');
+			screen.className = 'screen';
+			screen.style.backgroundImage = 'url("' + image + '")';
+			if (i > 0) screen.style.opacity = CONFIG.cameraGain;
+			parent.appendChild(screen);
+			screens.push(screen);
+			parent = screen;
 		}
 
 		function resize() {
-			var height = Math.min(innerWidth, innerHeight) * CONFIG.extent / 100 * CONFIG.size / 100;
-			for (var i = 0; i < layers.length; i++) {
-				layers[i].style.backgroundSize = height * 13 / 14 + 'px ' + height + 'px';
+			var height = Math.min(innerWidth, innerHeight) * CONFIG.size / 100;
+			for (var i = 0; i < screens.length; i++) {
+				screens[i].style.backgroundSize = height * 13 / 14 + 'px ' + height + 'px';
 			}
 		}
 		resize();
 		addEventListener('resize', resize);
 
-		var state = { x: 0, y: 0, vx: 0, vy: 0, mode: null, portrait: null, base: null, lastTouch: 0, lastMouse: null };
+		var state = {
+			aimX: 0, aimY: 0, tiltX: 0, tiltY: 0, roll: 0, wheel: 0,
+			ax: 0, ay: 0, tx: 0, ty: 0, tr: 0,
+			mouse: false, base: null, portrait: null, lastTouch: 0, lastMouse: null
+		};
 
-		addEventListener('touchstart', function () {
+		function onTouch(event) {
 			state.lastTouch = Date.now();
+			var touch = event.touches[0];
+			if (!touch) return;
+			state.tiltY = (touch.clientX / innerWidth * 2 - 1) * CONFIG.touchTilt;
+			state.tiltX = -(touch.clientY / innerHeight * 2 - 1) * CONFIG.touchTilt;
+			event.preventDefault();
+		}
+		addEventListener('touchstart', onTouch, { passive: false });
+		addEventListener('touchmove', onTouch, { passive: false });
+		addEventListener('touchend', function (event) {
+			if (event.touches.length === 0) state.tiltX = state.tiltY = 0;
 		});
 
 		addEventListener('mousemove', function (event) {
@@ -108,23 +113,54 @@
 			state.lastMouse = [event.clientX, event.clientY];
 			if (!last || (last[0] === event.clientX && last[1] === event.clientY)) return;
 			if (Date.now() - state.lastTouch < 1000) return;
-			state.mode = 'mouse';
-			state.x = event.clientX / innerWidth * 2 - 1;
-			state.y = event.clientY / innerHeight * 2 - 1;
+			state.mouse = true;
+			state.aimX = (event.clientX - innerWidth / 2) * CONFIG.aimSensitivity;
+			state.aimY = (event.clientY - innerHeight / 2) * CONFIG.aimSensitivity;
 		});
 
-		addEventListener('deviceorientation', function (event) {
-			if (state.mode === 'mouse' || event.beta == null || event.gamma == null) return;
-			state.mode = 'tilt';
-			var beta = event.beta / CONFIG.tiltDivisor;
-			var gamma = event.gamma / CONFIG.tiltDivisor;
-			var portrait = innerHeight > innerWidth;
-			if (portrait !== state.portrait || !state.base) {
-				state.portrait = portrait;
-				state.base = { beta: beta, gamma: gamma };
+		document.documentElement.addEventListener('mouseleave', function () {
+			state.aimX = state.aimY = 0;
+		});
+
+		addEventListener('onwheel' in document ? 'wheel' : 'mousewheel', function (event) {
+			var delta = event.deltaY !== undefined ? event.deltaY * (event.deltaMode === 1 ? 33 : 1) : -event.wheelDelta;
+			state.wheel += delta * CONFIG.wheelSensitivity;
+		});
+
+		function rotationMatrix(alpha, beta, gamma) {
+			var a = alpha * Math.PI / 180, b = beta * Math.PI / 180, g = gamma * Math.PI / 180;
+			var ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b), cg = Math.cos(g), sg = Math.sin(g);
+			return [
+				[ca * cg - sa * sb * sg, -sa * cb, ca * sg + sa * sb * cg],
+				[sa * cg + ca * sb * sg, ca * cb, sa * sg - ca * sb * cg],
+				[-cb * sg, sb, cb * cg]
+			];
+		}
+
+		function relativeRotation(from, to) {
+			var result = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+			for (var i = 0; i < 3; i++) {
+				for (var j = 0; j < 3; j++) {
+					for (var k = 0; k < 3; k++) result[i][j] += from[k][i] * to[k][j];
+				}
 			}
-			state.x = portrait ? gamma : beta;
-			state.y = portrait ? beta - state.base.beta : gamma - state.base.gamma;
+			return result;
+		}
+
+		addEventListener('deviceorientation', function (event) {
+			if (state.mouse || event.beta == null || event.gamma == null) return;
+			var matrix = rotationMatrix(event.alpha || 0, event.beta, event.gamma);
+			var portrait = innerHeight > innerWidth;
+			if (!state.base || portrait !== state.portrait) {
+				state.base = matrix;
+				state.portrait = portrait;
+			}
+			var r = relativeRotation(state.base, matrix);
+			var tiltX = -Math.atan2(-r[1][2], r[2][2]) * 180 / Math.PI;
+			var tiltY = Math.asin(Math.max(-1, Math.min(1, r[0][2]))) * 180 / Math.PI;
+			state.aimX = tiltY / CONFIG.tiltAim * innerWidth / 2 * CONFIG.aimSensitivity;
+			state.aimY = -tiltX / CONFIG.tiltAim * innerHeight / 2 * CONFIG.aimSensitivity;
+			state.roll = -Math.atan2(-r[0][1], r[0][0]) * 180 / Math.PI;
 		});
 		setTimeout(function () {
 			state.base = null;
@@ -137,19 +173,32 @@
 			});
 		}
 
+		var cameraScale = 1 / (2 * CONFIG.cameraDistance * Math.tan(CONFIG.cameraFov / 2 * Math.PI / 180));
+		var trail = [];
+
 		var requestFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || function (callback) {
 			setTimeout(callback, 16);
 		};
 
 		function frame() {
-			var scale = CONFIG.extent / 100 * CONFIG.sensitivity / 100;
-			state.vx += (state.x * innerWidth * scale - state.vx) * CONFIG.friction;
-			state.vy += (state.y * innerHeight * scale - state.vy) * CONFIG.friction;
-			var angle = Math.sqrt(state.vx * state.vx + state.vy * state.vy);
-			var rotation = state.mode === 'tilt'
-				? 'rotate3d(' + state.vy + ', ' + -state.vx + ', 0, ' + angle * CONFIG.tiltBoost + 'deg)'
-				: 'rotate3d(' + -state.vy + ', ' + state.vx + ', 0, ' + angle + 'deg)';
-			stack.style.webkitTransform = stack.style.transform = rotation;
+			state.ax += (state.aimX - state.ax) * CONFIG.friction;
+			state.ay += (state.aimY - state.ay) * CONFIG.friction;
+			state.tx += (state.tiltX - state.tx) * CONFIG.friction;
+			state.ty += (state.tiltY - state.ty) * CONFIG.friction;
+			state.tr += (state.roll + state.wheel - state.tr) * CONFIG.friction;
+			var camera = 'perspective(' + CONFIG.cameraDistance * innerWidth + 'px) '
+				+ 'rotateX(' + state.tx + 'deg) rotateY(' + state.ty + 'deg) '
+				+ 'rotate(' + (CONFIG.cameraAngle + state.tr) + 'deg) '
+				+ 'scale(' + cameraScale + ') '
+				+ 'translate(' + -state.ax + 'px, ' + -state.ay + 'px)';
+			var now = Date.now();
+			trail.unshift({ time: now, camera: camera });
+			var k = 0;
+			for (var i = 1; i < screens.length; i++) {
+				while (k < trail.length - 1 && trail[k].time > now - i * CONFIG.cameraLatency) k++;
+				screens[i].style.webkitTransform = screens[i].style.transform = trail[k].camera;
+			}
+			trail.length = k + 1;
 			requestFrame(frame);
 		}
 		frame();
