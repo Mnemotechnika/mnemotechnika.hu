@@ -4,7 +4,6 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 	<title>Mnemotechnika</title>
-	<meta name="application-name" content="Mnemotechnika">
 	<meta name="theme-color" content="#000000">
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,190 +11,148 @@
 	<meta name="apple-mobile-web-app-title" content="Mnemotechnika">
 	<link rel="icon" type="image/svg+xml" id="favicon">
 	<style>
-		:root {
-			--kiterjedes: 140%;
-			--perspektiva: 3000px;
-			--meret: 89%;
-		}
 		html, body {
 			margin: 0;
 			height: 100%;
 			background: #000;
 			overflow: hidden;
 		}
-		/* A színtér nagyobb a képernyőnél, hogy forgatáskor ne látszódjon a széle. */
+		#logo {
+			display: none;
+		}
 		#scene {
 			position: fixed;
-			inset: calc((100% - var(--kiterjedes)) / 2);
 			overflow: hidden;
-			perspective: var(--perspektiva);
 		}
-		#stack, #stack > div {
+		#stack, #stack div {
 			position: absolute;
-			inset: 0;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			-webkit-transform-style: preserve-3d;
 			transform-style: preserve-3d;
 		}
-		#stack > div {
-			background: var(--logo) center / auto var(--meret) no-repeat;
-		}
-		@media (orientation: portrait) {
-			#stack > div { background-size: var(--meret) auto; }
-		}
-		.static {
-			position: fixed;
-			inset: 0;
-			margin: auto;
-			width: 62vmin;
-			height: 62vmin;
+		#stack div {
+			background-repeat: no-repeat;
+			background-position: center;
 		}
 	</style>
 </head>
 <body>
-	<!-- A logó: három derékszögű sokszög egy 16 × 16-os rácson.
-	     Ebből készül a favikon és az animáció minden rétege;
-	     JavaScript nélkül ez az állókép látszik. -->
-	<svg id="logo" class="static" xmlns="http://www.w3.org/2000/svg" viewBox="-1.5 -1 16 16" width="1080" height="1080" role="img" aria-label="Mnemotechnika">
+	<svg id="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14" width="1300" height="1400">
 		<path fill="#e99022" d="M0,1 h2 v5 h6 v2 h-6 v5 h-2 z
 		                        M3,0 h1 v4 h6 v6 h-6 v4 h-1 v-5 h6 v-4 h-6 z
 		                        M5,1 h8 v12 h-8 v-2 h6 v-8 h-6 z"/>
 	</svg>
 
-	<div id="scene" role="img" aria-label="Mnemotechnika">
+	<div id="scene">
 		<div id="stack"></div>
 	</div>
 
 	<script>
-	'use strict';
-
-	/* ==== Beállítások =========================================================
-	   Bármelyik felülírható az URL-ben is, például:
-	   index.html?retegek=21&tavolsag=89&szin=3cf0b4
-	   ======================================================================== */
-	const BEALLITAS = {
-		retegek: 10,                  // a rétegek száma
-		tavolsag: 200,                // két egymás mögötti réteg távolsága (px)
-		perspektiva: 3000,            // a nézőpont távolsága (px), kisebb = erősebb térhatás
-		elsoAtlatszatlansag: 0.5,     // a legelső réteg átlátszatlansága (0–1)
-		utolsoAtlatszatlansag: 0.05,  // a leghátsó rétegé; köztük egyenletesen változik
-		meret: 89,                    // a logó mérete a színtér rövidebb oldalához képest (%)
-		kiterjedes: 140,              // a színtér mérete a képernyőhöz képest (%)
-		szin: '#e99022',              // a logó színe (P3 borostyán foszfor)
-		erzekenyseg: 1,               // mennyire fordul el az egérre vagy a döntésre
-		surlodas: 0.1,                // milyen gyorsan éri utol a mozdulatot (0–1, kisebb = lomhább)
-		dontesErosites: 2,            // telefonon ennyiszer erősebb a forgás, mint egérrel
-		dontesOszto: 30,              // a döntés szögét (fok) ennyivel osztja
-	};
-
-	// ---- URL-paraméterek ----------------------------------------------------
-	const query = new URLSearchParams(location.search);
-	for (const key of Object.keys(BEALLITAS)) {
-		if (!query.has(key)) continue;
-		const value = query.get(key).trim();
-		if (typeof BEALLITAS[key] === 'number') {
-			const number = parseFloat(value);
-			if (Number.isFinite(number)) BEALLITAS[key] = number;
-		} else if (/^#?[0-9a-f]{3,8}$/i.test(value)) {
-			BEALLITAS[key] = value.startsWith('#') ? value : '#' + value;
-		} else if (/^[a-z]+$/i.test(value)) {
-			BEALLITAS[key] = value;
-		}
-	}
-	const B = BEALLITAS;
-
-	// ---- A színtér felépítése -------------------------------------------------
-	const root = document.documentElement.style;
-	root.setProperty('--kiterjedes', B.kiterjedes + '%');
-	root.setProperty('--perspektiva', B.perspektiva + 'px');
-	root.setProperty('--meret', B.meret + '%');
-
-	// A rétegek és a favikon az oldalba ágyazott SVG-ből készülnek, a beállított színnel.
-	const logo = document.getElementById('logo');
-	const dataUri = svg => 'data:image/svg+xml,' + encodeURIComponent(new XMLSerializer().serializeToString(svg));
-	const image = logo.cloneNode(true);
-	for (const attr of ['id', 'class', 'role', 'aria-label']) image.removeAttribute(attr);
-	image.querySelector('path').setAttribute('fill', B.szin);
-	root.setProperty('--logo', 'url("' + dataUri(image) + '")');
-	image.setAttribute('shape-rendering', 'crispEdges');   // a kis favikon éles legyen
-	document.getElementById('favicon').href = dataUri(image);
-	logo.remove();                                         // az állókép csak JavaScript nélkül kell
-
-	const stack = document.getElementById('stack');
-	const count = Math.max(1, Math.round(B.retegek));
-	for (let i = 0; i < count; i++) {
-		const t = count > 1 ? i / (count - 1) : 0;
-		const layer = document.createElement('div');
-		layer.style.transform = 'translateZ(' + (-i * B.tavolsag) + 'px)';
-		layer.style.opacity = B.elsoAtlatszatlansag + (B.utolsoAtlatszatlansag - B.elsoAtlatszatlansag) * t;
-		stack.append(layer);
-	}
-
-	// ---- Bemenet: egér vagy a telefon döntése ---------------------------------
-	const desktop = matchMedia('(hover: hover) and (pointer: fine)').matches;
-	const input = { x: 0, y: 0, vx: 0, vy: 0, tilt: false, portrait: null, base: null };
-
-	// Számítógépen az egér mozgatja, telefonon és tableten csak a döntés.
-	addEventListener('pointermove', event => {
-		if (!desktop) return;
-		input.x = (event.clientX - innerWidth / 2) / (innerWidth / 2);
-		input.y = (event.clientY - innerHeight / 2) / (innerHeight / 2);
-	});
-
-	addEventListener('deviceorientation', event => {
-		if (desktop || event.beta == null || event.gamma == null) return;
-		input.tilt = true;
-		const beta = event.beta / B.dontesOszto;
-		const gamma = event.gamma / B.dontesOszto;
-		const portrait = innerHeight > innerWidth;
-		if (portrait !== input.portrait) {
-			input.portrait = portrait;
-			input.base = null;
-		}
-		if (input.base === null) input.base = { beta, gamma };
-		// Álló helyzetben az oldalra döntés nyers, az előre-hátra döntés
-		// a kiindulási helyzethez képest számít; fekvő helyzetben fordítva.
-		if (portrait) {
-			input.x = gamma;
-			input.y = beta - input.base.beta;
-		} else {
-			input.x = beta;
-			input.y = gamma - input.base.gamma;
-		}
-	});
-
-	// Fél másodperc múlva újrakalibrál: addigra nyugszik meg a telefon a kézben.
-	setTimeout(() => { input.base = null; }, 500);
-
-	// iOS 13 óta a döntésérzékelőhöz engedély kell, amit csak érintésre lehet kérni:
-	// az első koppintás bárhol a képernyőn feldobja a rendszer engedélykérő ablakát.
-	if (!desktop && typeof DeviceOrientationEvent !== 'undefined'
-		&& typeof DeviceOrientationEvent.requestPermission === 'function') {
-		const ask = () => {
-			DeviceOrientationEvent.requestPermission().catch(() => {});
-			removeEventListener('touchend', ask);
-			removeEventListener('click', ask);
+		var CONFIG = {
+			layers: 10,
+			spacing: 200,
+			perspective: 3000,
+			frontOpacity: 0.5,
+			backOpacity: 0.05,
+			size: 77.875,
+			extent: 140,
+			color: '#e99022',
+			sensitivity: 1,
+			friction: 0.1,
+			tiltBoost: 2,
+			tiltDivisor: 30
 		};
-		addEventListener('touchend', ask);
-		addEventListener('click', ask);
-	}
 
-	// ---- Animáció -------------------------------------------------------------
-	let last = performance.now();
-	function frame(now) {
-		const dt = Math.min(now - last, 100) / 1000;
-		last = now;
-		const scale = B.kiterjedes / 100 * B.erzekenyseg / 100;
-		const targetX = input.x * innerWidth * scale;
-		const targetY = input.y * innerHeight * scale;
-		const follow = 1 - Math.pow(1 - B.surlodas, dt * 60);
-		input.vx += (targetX - input.vx) * follow;
-		input.vy += (targetY - input.vy) * follow;
-		const angle = Math.hypot(input.vx, input.vy);
-		stack.style.transform = input.tilt
-			? 'rotate3d(' + input.vy + ', ' + (-input.vx) + ', 0, ' + angle * B.dontesErosites + 'deg)'
-			: 'rotate3d(' + (-input.vy) + ', ' + input.vx + ', 0, ' + angle + 'deg)';
-		requestAnimationFrame(frame);
-	}
-	if (!matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(frame);
+		var logo = document.getElementById('logo');
+		logo.querySelector('path').setAttribute('fill', CONFIG.color);
+		var image = 'data:image/svg+xml,' + encodeURIComponent(new XMLSerializer().serializeToString(logo));
+		document.getElementById('favicon').href = image;
+
+		var scene = document.getElementById('scene');
+		scene.style.left = scene.style.top = (100 - CONFIG.extent) / 2 + '%';
+		scene.style.width = scene.style.height = CONFIG.extent + '%';
+		scene.style.webkitPerspective = scene.style.perspective = CONFIG.perspective + 'px';
+
+		var stack = document.getElementById('stack');
+		var layers = [];
+		for (var i = 0; i < CONFIG.layers; i++) {
+			var layer = document.createElement('div');
+			var depth = i / Math.max(CONFIG.layers - 1, 1);
+			layer.style.backgroundImage = 'url("' + image + '")';
+			layer.style.webkitTransform = layer.style.transform = 'translateZ(' + -i * CONFIG.spacing + 'px)';
+			layer.style.opacity = CONFIG.frontOpacity + (CONFIG.backOpacity - CONFIG.frontOpacity) * depth;
+			stack.appendChild(layer);
+			layers.push(layer);
+		}
+
+		function resize() {
+			var height = Math.min(innerWidth, innerHeight) * CONFIG.extent / 100 * CONFIG.size / 100;
+			for (var i = 0; i < layers.length; i++) {
+				layers[i].style.backgroundSize = height * 13 / 14 + 'px ' + height + 'px';
+			}
+		}
+		resize();
+		addEventListener('resize', resize);
+
+		var state = { x: 0, y: 0, vx: 0, vy: 0, mode: null, portrait: null, base: null, lastTouch: 0, lastMouse: null };
+
+		addEventListener('touchstart', function () {
+			state.lastTouch = Date.now();
+		});
+
+		addEventListener('mousemove', function (event) {
+			var last = state.lastMouse;
+			state.lastMouse = [event.clientX, event.clientY];
+			if (!last || (last[0] === event.clientX && last[1] === event.clientY)) return;
+			if (Date.now() - state.lastTouch < 1000) return;
+			state.mode = 'mouse';
+			state.x = event.clientX / innerWidth * 2 - 1;
+			state.y = event.clientY / innerHeight * 2 - 1;
+		});
+
+		addEventListener('deviceorientation', function (event) {
+			if (state.mode === 'mouse' || event.beta == null || event.gamma == null) return;
+			state.mode = 'tilt';
+			var beta = event.beta / CONFIG.tiltDivisor;
+			var gamma = event.gamma / CONFIG.tiltDivisor;
+			var portrait = innerHeight > innerWidth;
+			if (portrait !== state.portrait || !state.base) {
+				state.portrait = portrait;
+				state.base = { beta: beta, gamma: gamma };
+			}
+			state.x = portrait ? gamma : beta;
+			state.y = portrait ? beta - state.base.beta : gamma - state.base.gamma;
+		});
+		setTimeout(function () {
+			state.base = null;
+		}, 500);
+
+		if (window.DeviceOrientationEvent && DeviceOrientationEvent.requestPermission) {
+			addEventListener('touchend', function ask() {
+				removeEventListener('touchend', ask);
+				DeviceOrientationEvent.requestPermission();
+			});
+		}
+
+		var requestFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || function (callback) {
+			setTimeout(callback, 16);
+		};
+
+		function frame() {
+			var scale = CONFIG.extent / 100 * CONFIG.sensitivity / 100;
+			state.vx += (state.x * innerWidth * scale - state.vx) * CONFIG.friction;
+			state.vy += (state.y * innerHeight * scale - state.vy) * CONFIG.friction;
+			var angle = Math.sqrt(state.vx * state.vx + state.vy * state.vy);
+			var rotation = state.mode === 'tilt'
+				? 'rotate3d(' + state.vy + ', ' + -state.vx + ', 0, ' + angle * CONFIG.tiltBoost + 'deg)'
+				: 'rotate3d(' + -state.vy + ', ' + state.vx + ', 0, ' + angle + 'deg)';
+			stack.style.webkitTransform = stack.style.transform = rotation;
+			requestFrame(frame);
+		}
+		frame();
 	</script>
 </body>
 </html>
