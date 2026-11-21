@@ -1,71 +1,201 @@
+<!doctype html>
+<html lang="hu">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<title>Mnemotechnika</title>
+	<meta name="application-name" content="Mnemotechnika">
+	<meta name="theme-color" content="#000000">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="apple-mobile-web-app-title" content="Mnemotechnika">
+	<link rel="icon" type="image/svg+xml" id="favicon">
+	<style>
+		:root {
+			--kiterjedes: 140%;
+			--perspektiva: 3000px;
+			--meret: 89%;
+		}
+		html, body {
+			margin: 0;
+			height: 100%;
+			background: #000;
+			overflow: hidden;
+		}
+		/* A színtér nagyobb a képernyőnél, hogy forgatáskor ne látszódjon a széle. */
+		#scene {
+			position: fixed;
+			inset: calc((100% - var(--kiterjedes)) / 2);
+			overflow: hidden;
+			perspective: var(--perspektiva);
+		}
+		#stack, #stack > div {
+			position: absolute;
+			inset: 0;
+			transform-style: preserve-3d;
+		}
+		#stack > div {
+			background: var(--logo) center / auto var(--meret) no-repeat;
+		}
+		@media (orientation: portrait) {
+			#stack > div { background-size: var(--meret) auto; }
+		}
+		.static {
+			position: fixed;
+			inset: 0;
+			margin: auto;
+			width: 62vmin;
+			height: 62vmin;
+		}
+	</style>
+</head>
+<body>
+	<!-- A logó: három derékszögű sokszög egy 16 × 16-os rácson.
+	     Ebből készül a favikon és az animáció minden rétege;
+	     JavaScript nélkül ez az állókép látszik. -->
+	<svg id="logo" class="static" xmlns="http://www.w3.org/2000/svg" viewBox="-1.5 -1 16 16" width="1080" height="1080" role="img" aria-label="Mnemotechnika">
+		<path fill="#e99022" d="M0,1 h2 v5 h6 v2 h-6 v5 h-2 z
+		                        M3,0 h1 v4 h6 v6 h-6 v4 h-1 v-5 h6 v-4 h-6 z
+		                        M5,1 h8 v12 h-8 v-2 h6 v-8 h-6 z"/>
+	</svg>
 
-<!DOCTYPE html>
-<html>
-	<head>
-		<title>Mnemotechnika</title>		
-		<meta charset="utf-8>
-		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-		
-		<link rel="apple-touch-icon" sizes="57x57" href="/icons/icon_57.png">
-		<link rel="apple-touch-icon" sizes="60x60" href="/icons/icon_60.png">
-		<link rel="apple-touch-icon" sizes="72x72" href="/icons/icon_72.png">
-		<link rel="apple-touch-icon" sizes="76x76" href="/icons/icon_76.png">
-		<link rel="apple-touch-icon" sizes="114x114" href="/icons/icon_114.png">
-		<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon_120.png">
-		<link rel="apple-touch-icon" sizes="128x128" href="/icons/icon_128.png">
-		<link rel="apple-touch-icon" sizes="144x144" href="/icons/icon_144.png">
-		<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon_152.png">
-		<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon_180.png">
-		<link rel="apple-touch-startup-image" href="/startup.png">
-		
-		<link rel="icon" type="image/png" sizes="192x192"  href="/icons/icon_192.png">
-		<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon_32.png">
-		<link rel="icon" type="image/png" sizes="96x96" href="/icons/icon_96.png">
-		<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon_16.png">
-		<link rel="manifest" href="/manifest.json">
-		
-		<meta name="msapplication-TileColor" content="#000000">
-		<meta name="msapplication-TileImage" content="ico/ms-icon-144x144.png">
-		<meta name="msapplication-navbutton-color" content="#000000">
+	<div id="scene" role="img" aria-label="Mnemotechnika">
+		<div id="stack"></div>
+	</div>
 
+	<script>
+	'use strict';
 
-		<meta name="apple-mobile-web-app-capable" content="yes">
-		<meta name="apple-mobile-web-app-status-bar-style" content="black">
-		<meta name="apple-mobile-web-app-title" content="Mnemotechnika">
-		
-		<meta name="mobile-web-app-capable" content="yes">
-		<meta name="application-name" content="Mnemotechnika">
-		<meta name="theme-color" content="#000000">
+	/* ==== Beállítások =========================================================
+	   Bármelyik felülírható az URL-ben is, például:
+	   index.html?retegek=21&tavolsag=89&szin=3cf0b4
+	   ======================================================================== */
+	const BEALLITAS = {
+		retegek: 10,                  // a rétegek száma
+		tavolsag: 200,                // két egymás mögötti réteg távolsága (px)
+		perspektiva: 3000,            // a nézőpont távolsága (px), kisebb = erősebb térhatás
+		elsoAtlatszatlansag: 0.5,     // a legelső réteg átlátszatlansága (0–1)
+		utolsoAtlatszatlansag: 0.05,  // a leghátsó rétegé; köztük egyenletesen változik
+		meret: 89,                    // a logó mérete a színtér rövidebb oldalához képest (%)
+		kiterjedes: 140,              // a színtér mérete a képernyőhöz képest (%)
+		szin: '#e99022',              // a logó színe (P3 borostyán foszfor)
+		erzekenyseg: 1,               // mennyire fordul el az egérre vagy a döntésre
+		surlodas: 0.1,                // milyen gyorsan éri utol a mozdulatot (0–1, kisebb = lomhább)
+		dontesErosites: 2,            // telefonon ennyiszer erősebb a forgás, mint egérrel
+		dontesOszto: 30,              // a döntés szögét (fok) ennyivel osztja
+	};
 
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-	
-		<link rel="shortcut icon" href="/icons/favicon.ico?v=<?php echo time(); ?>">
-		<link rel='stylesheet' href='/style.css' type='text/css' media='all' />
-		<script type='text/javascript' src='jquery.js'></script>
-		<script type='text/javascript' src='jquery.tilt.js'></script>
-		<script>
-			$(document).ready( function() {
-				$( '#background>div' ).parallax({
-					pan: true
-				});
-			});
-		</script>
-	</head>
-	<body>
-		<div id="background" class="parallax" >
-			<div data-friction-x="0.1" data-friction-y="0.1" data-scalar-y="1" data-scalar-x="1">
-				<div style="background-image: url(mnemotechnika.png); transform: translateZ(-0px); -ms-transform: translateZ(-0px); -moz-transform: translateZ(-0px); -webkit-transform: translateZ(-0px); opacity: 0.5"></div>
-				<div style="background-image: url(mnemotechnika.png); transform: translateZ(-200px); -ms-transform: translateZ(-200px); -moz-transform: translateZ(-200px); -webkit-transform: translateZ(-200px); opacity: 0.45"></div>
-				<div style="background-image: url(mnemotechnika.png); transform: translateZ(-400px); -ms-transform: translateZ(-400px); -moz-transform: translateZ(-400px); -webkit-transform: translateZ(-400px); opacity: 0.40"></div>
-				<div style="background-image: url(mnemotechnika.png); transform: translateZ(-600px); -ms-transform: translateZ(-600px); -moz-transform: translateZ(-600px); -webkit-transform: translateZ(-600px); opacity: 0.35"></div>
-				<div style="background-image: url(mnemotechnika.png); transform: translateZ(-800px); -ms-transform: translateZ(-800px); -moz-transform: translateZ(-800px); -webkit-transform: translateZ(-800px); opacity: 0.30"></div>
-				<div style="background-image: url(mnemotechnika.png); transform: translateZ(-1000px); -ms-transform: translateZ(-1000px); -moz-transform: translateZ(-1000px); -webkit-transform: translateZ(-1000px); opacity: 0.25"></div>
-				<div style="background-image: url(mnemotechnika.png); transform: translateZ(-1200px); -ms-transform: translateZ(-1200px); -moz-transform: translateZ(-1200px); -webkit-transform: translateZ(-1200px); opacity: 0.20"></div>
-				<div style="background-image: url(mnemotechnika.png); transform: translateZ(-1400px); -ms-transform: translateZ(-1400px); -moz-transform: translateZ(-1400px); -webkit-transform: translateZ(-1400px); opacity: 0.15"></div>
-				<div style="background-image: url(mnemotechnika.png); transform: translateZ(-1600px); -ms-transform: translateZ(-1600px); -moz-transform: translateZ(-1600px); -webkit-transform: translateZ(-1600px); opacity: 0.10"></div>
-				<div style="background-image: url(mnemotechnika.png); transform: translateZ(-1800px); -ms-transform: translateZ(-1900px); -moz-transform: translateZ(-1800px); -webkit-transform: translateZ(-1800px); opacity: 0.05"></div>
-			</div>
-		</div>
-		Proba
-	</body>
+	// ---- URL-paraméterek ----------------------------------------------------
+	const query = new URLSearchParams(location.search);
+	for (const key of Object.keys(BEALLITAS)) {
+		if (!query.has(key)) continue;
+		const value = query.get(key).trim();
+		if (typeof BEALLITAS[key] === 'number') {
+			const number = parseFloat(value);
+			if (Number.isFinite(number)) BEALLITAS[key] = number;
+		} else if (/^#?[0-9a-f]{3,8}$/i.test(value)) {
+			BEALLITAS[key] = value.startsWith('#') ? value : '#' + value;
+		} else if (/^[a-z]+$/i.test(value)) {
+			BEALLITAS[key] = value;
+		}
+	}
+	const B = BEALLITAS;
+
+	// ---- A színtér felépítése -------------------------------------------------
+	const root = document.documentElement.style;
+	root.setProperty('--kiterjedes', B.kiterjedes + '%');
+	root.setProperty('--perspektiva', B.perspektiva + 'px');
+	root.setProperty('--meret', B.meret + '%');
+
+	// A rétegek és a favikon az oldalba ágyazott SVG-ből készülnek, a beállított színnel.
+	const logo = document.getElementById('logo');
+	const dataUri = svg => 'data:image/svg+xml,' + encodeURIComponent(new XMLSerializer().serializeToString(svg));
+	const image = logo.cloneNode(true);
+	for (const attr of ['id', 'class', 'role', 'aria-label']) image.removeAttribute(attr);
+	image.querySelector('path').setAttribute('fill', B.szin);
+	root.setProperty('--logo', 'url("' + dataUri(image) + '")');
+	image.setAttribute('shape-rendering', 'crispEdges');   // a kis favikon éles legyen
+	document.getElementById('favicon').href = dataUri(image);
+	logo.remove();                                         // az állókép csak JavaScript nélkül kell
+
+	const stack = document.getElementById('stack');
+	const count = Math.max(1, Math.round(B.retegek));
+	for (let i = 0; i < count; i++) {
+		const t = count > 1 ? i / (count - 1) : 0;
+		const layer = document.createElement('div');
+		layer.style.transform = 'translateZ(' + (-i * B.tavolsag) + 'px)';
+		layer.style.opacity = B.elsoAtlatszatlansag + (B.utolsoAtlatszatlansag - B.elsoAtlatszatlansag) * t;
+		stack.append(layer);
+	}
+
+	// ---- Bemenet: egér vagy a telefon döntése ---------------------------------
+	const desktop = matchMedia('(hover: hover) and (pointer: fine)').matches;
+	const input = { x: 0, y: 0, vx: 0, vy: 0, tilt: false, portrait: null, base: null };
+
+	// Számítógépen az egér mozgatja, telefonon és tableten csak a döntés.
+	addEventListener('pointermove', event => {
+		if (!desktop) return;
+		input.x = (event.clientX - innerWidth / 2) / (innerWidth / 2);
+		input.y = (event.clientY - innerHeight / 2) / (innerHeight / 2);
+	});
+
+	addEventListener('deviceorientation', event => {
+		if (desktop || event.beta == null || event.gamma == null) return;
+		input.tilt = true;
+		const beta = event.beta / B.dontesOszto;
+		const gamma = event.gamma / B.dontesOszto;
+		const portrait = innerHeight > innerWidth;
+		if (portrait !== input.portrait) {
+			input.portrait = portrait;
+			input.base = null;
+		}
+		if (input.base === null) input.base = { beta, gamma };
+		// Álló helyzetben az oldalra döntés nyers, az előre-hátra döntés
+		// a kiindulási helyzethez képest számít; fekvő helyzetben fordítva.
+		if (portrait) {
+			input.x = gamma;
+			input.y = beta - input.base.beta;
+		} else {
+			input.x = beta;
+			input.y = gamma - input.base.gamma;
+		}
+	});
+
+	// Fél másodperc múlva újrakalibrál: addigra nyugszik meg a telefon a kézben.
+	setTimeout(() => { input.base = null; }, 500);
+
+	// iOS 13 óta a döntésérzékelőhöz engedély kell, amit csak érintésre lehet kérni:
+	// az első koppintás bárhol a képernyőn feldobja a rendszer engedélykérő ablakát.
+	if (!desktop && typeof DeviceOrientationEvent !== 'undefined'
+		&& typeof DeviceOrientationEvent.requestPermission === 'function') {
+		const ask = () => {
+			DeviceOrientationEvent.requestPermission().catch(() => {});
+			removeEventListener('touchend', ask);
+			removeEventListener('click', ask);
+		};
+		addEventListener('touchend', ask);
+		addEventListener('click', ask);
+	}
+
+	// ---- Animáció -------------------------------------------------------------
+	let last = performance.now();
+	function frame(now) {
+		const dt = Math.min(now - last, 100) / 1000;
+		last = now;
+		const scale = B.kiterjedes / 100 * B.erzekenyseg / 100;
+		const targetX = input.x * innerWidth * scale;
+		const targetY = input.y * innerHeight * scale;
+		const follow = 1 - Math.pow(1 - B.surlodas, dt * 60);
+		input.vx += (targetX - input.vx) * follow;
+		input.vy += (targetY - input.vy) * follow;
+		const angle = Math.hypot(input.vx, input.vy);
+		stack.style.transform = input.tilt
+			? 'rotate3d(' + input.vy + ', ' + (-input.vx) + ', 0, ' + angle * B.dontesErosites + 'deg)'
+			: 'rotate3d(' + (-input.vy) + ', ' + input.vx + ', 0, ' + angle + 'deg)';
+		requestAnimationFrame(frame);
+	}
+	if (!matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(frame);
+	</script>
+</body>
 </html>
