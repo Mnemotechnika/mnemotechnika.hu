@@ -1,71 +1,208 @@
+<!doctype html>
+<html lang="hu">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<title>Mnemotechnika</title>
+	<meta name="description" content="habit amplifier - spatial cue for a habit">
+	<meta name="theme-color" content="#000000">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="apple-mobile-web-app-title" content="Mnemotechnika">
+	<link rel="icon" type="image/svg+xml" id="favicon">
+	<style>
+		html, body {
+			margin: 0;
+			height: 100%;
+			background: #000;
+			overflow: hidden;
+		}
+		#logo {
+			display: none;
+		}
+		.screen {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			overflow: hidden;
+			background-repeat: no-repeat;
+			background-position: center;
+		}
+		body > .screen {
+			position: fixed;
+		}
+		.screen .screen {
+			mix-blend-mode: screen;
+		}
+	</style>
+</head>
+<body>
+	<svg id="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 14" width="1300" height="1400">
+		<path fill="#e99022" d="M0,1 h2 v5 h6 v2 h-6 v5 h-2 z
+		                        M3,0 h1 v4 h6 v6 h-6 v4 h-1 v-5 h6 v-4 h-6 z
+		                        M5,1 h8 v12 h-8 v-2 h6 v-8 h-6 z"/>
+	</svg>
 
-<!DOCTYPE html>
-<html>
-	<head>
-		<title>Mnemotechnika</title>		
-		<meta charset="utf-8>
-		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-		
-		<link rel="apple-touch-icon" sizes="57x57" href="/icons/icon_57.png">
-		<link rel="apple-touch-icon" sizes="60x60" href="/icons/icon_60.png">
-		<link rel="apple-touch-icon" sizes="72x72" href="/icons/icon_72.png">
-		<link rel="apple-touch-icon" sizes="76x76" href="/icons/icon_76.png">
-		<link rel="apple-touch-icon" sizes="114x114" href="/icons/icon_114.png">
-		<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon_120.png">
-		<link rel="apple-touch-icon" sizes="128x128" href="/icons/icon_128.png">
-		<link rel="apple-touch-icon" sizes="144x144" href="/icons/icon_144.png">
-		<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon_152.png">
-		<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon_180.png">
-		<link rel="apple-touch-startup-image" href="/startup.png">
-		
-		<link rel="icon" type="image/png" sizes="192x192"  href="/icons/icon_192.png">
-		<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon_32.png">
-		<link rel="icon" type="image/png" sizes="96x96" href="/icons/icon_96.png">
-		<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon_16.png">
-		<link rel="manifest" href="/manifest.json">
-		
-		<meta name="msapplication-TileColor" content="#000000">
-		<meta name="msapplication-TileImage" content="ico/ms-icon-144x144.png">
-		<meta name="msapplication-navbutton-color" content="#000000">
+	<script>
+		var CONFIG = {
+			color: '#e99022',
+			size: 109,
+			cameraDistance: 1.543,
+			cameraFov: 40,
+			cameraAngle: 0,
+			cameraLatency: 100,
+			cameraGain: 0.55,
+			aimSensitivity: 0.25,
+			tiltAim: 45,
+			touchTilt: 30,
+			wheelSensitivity: 0.05,
+			friction: 0.1
+		};
 
+		var logo = document.getElementById('logo');
+		logo.querySelector('path').setAttribute('fill', CONFIG.color);
+		var image = 'data:image/svg+xml,' + encodeURIComponent(new XMLSerializer().serializeToString(logo));
+		document.getElementById('favicon').href = image;
 
-		<meta name="apple-mobile-web-app-capable" content="yes">
-		<meta name="apple-mobile-web-app-status-bar-style" content="black">
-		<meta name="apple-mobile-web-app-title" content="Mnemotechnika">
-		
-		<meta name="mobile-web-app-capable" content="yes">
-		<meta name="application-name" content="Mnemotechnika">
-		<meta name="theme-color" content="#000000">
+		var levels = Math.min(Math.ceil(Math.log(0.02) / Math.log(CONFIG.cameraGain)), 30);
+		var screens = [];
+		var parent = document.body;
+		for (var i = 0; i <= levels; i++) {
+			var screen = document.createElement('div');
+			screen.className = 'screen';
+			screen.style.backgroundImage = 'url("' + image + '")';
+			if (i > 0) screen.style.opacity = CONFIG.cameraGain;
+			parent.appendChild(screen);
+			screens.push(screen);
+			parent = screen;
+		}
 
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-	
-		<link rel="shortcut icon" href="/icons/favicon.ico?v=<?php echo time(); ?>">
-		<link rel='stylesheet' href='/style.css' type='text/css' media='all' />
-		<script type='text/javascript' src='jquery.js'></script>
-		<script type='text/javascript' src='jquery.tilt.js'></script>
-		<script>
-			$(document).ready( function() {
-				$( '#background>div' ).parallax({
-					pan: true
-				});
+		function resize() {
+			var height = Math.min(innerWidth, innerHeight) * CONFIG.size / 100;
+			for (var i = 0; i < screens.length; i++) {
+				screens[i].style.backgroundSize = height * 13 / 14 + 'px ' + height + 'px';
+			}
+		}
+		resize();
+		addEventListener('resize', resize);
+
+		var state = {
+			aimX: 0, aimY: 0, tiltX: 0, tiltY: 0, roll: 0, wheel: 0,
+			ax: 0, ay: 0, tx: 0, ty: 0, tr: 0,
+			mouse: false, base: null, portrait: null, lastTouch: 0, lastMouse: null
+		};
+
+		function onTouch(event) {
+			state.lastTouch = Date.now();
+			var touch = event.touches[0];
+			if (!touch) return;
+			state.tiltY = (touch.clientX / innerWidth * 2 - 1) * CONFIG.touchTilt;
+			state.tiltX = -(touch.clientY / innerHeight * 2 - 1) * CONFIG.touchTilt;
+			event.preventDefault();
+		}
+		addEventListener('touchstart', onTouch, { passive: false });
+		addEventListener('touchmove', onTouch, { passive: false });
+		addEventListener('touchend', function (event) {
+			if (event.touches.length === 0) state.tiltX = state.tiltY = 0;
+		});
+
+		addEventListener('mousemove', function (event) {
+			var last = state.lastMouse;
+			state.lastMouse = [event.clientX, event.clientY];
+			if (!last || (last[0] === event.clientX && last[1] === event.clientY)) return;
+			if (Date.now() - state.lastTouch < 1000) return;
+			state.mouse = true;
+			state.aimX = (event.clientX - innerWidth / 2) * CONFIG.aimSensitivity;
+			state.aimY = (event.clientY - innerHeight / 2) * CONFIG.aimSensitivity;
+		});
+
+		document.documentElement.addEventListener('mouseleave', function () {
+			state.aimX = state.aimY = 0;
+		});
+
+		addEventListener('onwheel' in document ? 'wheel' : 'mousewheel', function (event) {
+			var delta = event.deltaY !== undefined ? event.deltaY * (event.deltaMode === 1 ? 33 : 1) : -event.wheelDelta;
+			state.wheel += delta * CONFIG.wheelSensitivity;
+		});
+
+		function rotationMatrix(alpha, beta, gamma) {
+			var a = alpha * Math.PI / 180, b = beta * Math.PI / 180, g = gamma * Math.PI / 180;
+			var ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b), cg = Math.cos(g), sg = Math.sin(g);
+			return [
+				[ca * cg - sa * sb * sg, -sa * cb, ca * sg + sa * sb * cg],
+				[sa * cg + ca * sb * sg, ca * cb, sa * sg - ca * sb * cg],
+				[-cb * sg, sb, cb * cg]
+			];
+		}
+
+		function relativeRotation(from, to) {
+			var result = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+			for (var i = 0; i < 3; i++) {
+				for (var j = 0; j < 3; j++) {
+					for (var k = 0; k < 3; k++) result[i][j] += from[k][i] * to[k][j];
+				}
+			}
+			return result;
+		}
+
+		addEventListener('deviceorientation', function (event) {
+			if (state.mouse || event.beta == null || event.gamma == null) return;
+			var matrix = rotationMatrix(event.alpha || 0, event.beta, event.gamma);
+			var portrait = innerHeight > innerWidth;
+			if (!state.base || portrait !== state.portrait) {
+				state.base = matrix;
+				state.portrait = portrait;
+			}
+			var r = relativeRotation(state.base, matrix);
+			var tiltX = -Math.atan2(-r[1][2], r[2][2]) * 180 / Math.PI;
+			var tiltY = Math.asin(Math.max(-1, Math.min(1, r[0][2]))) * 180 / Math.PI;
+			state.aimX = tiltY / CONFIG.tiltAim * innerWidth / 2 * CONFIG.aimSensitivity;
+			state.aimY = -tiltX / CONFIG.tiltAim * innerHeight / 2 * CONFIG.aimSensitivity;
+			state.roll = -Math.atan2(-r[0][1], r[0][0]) * 180 / Math.PI;
+		});
+		setTimeout(function () {
+			state.base = null;
+		}, 500);
+
+		if (window.DeviceOrientationEvent && DeviceOrientationEvent.requestPermission) {
+			addEventListener('touchend', function ask() {
+				removeEventListener('touchend', ask);
+				DeviceOrientationEvent.requestPermission();
 			});
-		</script>
-	</head>
-	<body>
-		<div id="background" class="parallax" >
-			<div data-friction-x="0.1" data-friction-y="0.1" data-scalar-y="1" data-scalar-x="1">
-				<div style="background-image: url(mnemotechnika.png); transform: translateZ(-0px); -ms-transform: translateZ(-0px); -moz-transform: translateZ(-0px); -webkit-transform: translateZ(-0px); opacity: 0.5"></div>
-				<div style="background-image: url(mnemotechnika.png); transform: translateZ(-200px); -ms-transform: translateZ(-200px); -moz-transform: translateZ(-200px); -webkit-transform: translateZ(-200px); opacity: 0.45"></div>
-				<div style="background-image: url(mnemotechnika.png); transform: translateZ(-400px); -ms-transform: translateZ(-400px); -moz-transform: translateZ(-400px); -webkit-transform: translateZ(-400px); opacity: 0.40"></div>
-				<div style="background-image: url(mnemotechnika.png); transform: translateZ(-600px); -ms-transform: translateZ(-600px); -moz-transform: translateZ(-600px); -webkit-transform: translateZ(-600px); opacity: 0.35"></div>
-				<div style="background-image: url(mnemotechnika.png); transform: translateZ(-800px); -ms-transform: translateZ(-800px); -moz-transform: translateZ(-800px); -webkit-transform: translateZ(-800px); opacity: 0.30"></div>
-				<div style="background-image: url(mnemotechnika.png); transform: translateZ(-1000px); -ms-transform: translateZ(-1000px); -moz-transform: translateZ(-1000px); -webkit-transform: translateZ(-1000px); opacity: 0.25"></div>
-				<div style="background-image: url(mnemotechnika.png); transform: translateZ(-1200px); -ms-transform: translateZ(-1200px); -moz-transform: translateZ(-1200px); -webkit-transform: translateZ(-1200px); opacity: 0.20"></div>
-				<div style="background-image: url(mnemotechnika.png); transform: translateZ(-1400px); -ms-transform: translateZ(-1400px); -moz-transform: translateZ(-1400px); -webkit-transform: translateZ(-1400px); opacity: 0.15"></div>
-				<div style="background-image: url(mnemotechnika.png); transform: translateZ(-1600px); -ms-transform: translateZ(-1600px); -moz-transform: translateZ(-1600px); -webkit-transform: translateZ(-1600px); opacity: 0.10"></div>
-				<div style="background-image: url(mnemotechnika.png); transform: translateZ(-1800px); -ms-transform: translateZ(-1900px); -moz-transform: translateZ(-1800px); -webkit-transform: translateZ(-1800px); opacity: 0.05"></div>
-			</div>
-		</div>
-		Proba
-	</body>
+		}
+
+		var cameraScale = 1 / (2 * CONFIG.cameraDistance * Math.tan(CONFIG.cameraFov / 2 * Math.PI / 180));
+		var trail = [];
+
+		var requestFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || function (callback) {
+			setTimeout(callback, 16);
+		};
+
+		function frame() {
+			state.ax += (state.aimX - state.ax) * CONFIG.friction;
+			state.ay += (state.aimY - state.ay) * CONFIG.friction;
+			state.tx += (state.tiltX - state.tx) * CONFIG.friction;
+			state.ty += (state.tiltY - state.ty) * CONFIG.friction;
+			state.tr += (state.roll + state.wheel - state.tr) * CONFIG.friction;
+			var camera = 'perspective(' + CONFIG.cameraDistance * innerWidth + 'px) '
+				+ 'rotateX(' + state.tx + 'deg) rotateY(' + state.ty + 'deg) '
+				+ 'rotate(' + (CONFIG.cameraAngle + state.tr) + 'deg) '
+				+ 'scale(' + cameraScale + ') '
+				+ 'translate(' + -state.ax + 'px, ' + -state.ay + 'px)';
+			var now = Date.now();
+			trail.unshift({ time: now, camera: camera });
+			var k = 0;
+			for (var i = 1; i < screens.length; i++) {
+				while (k < trail.length - 1 && trail[k].time > now - i * CONFIG.cameraLatency) k++;
+				screens[i].style.webkitTransform = screens[i].style.transform = trail[k].camera;
+			}
+			trail.length = k + 1;
+			requestFrame(frame);
+		}
+		frame();
+	</script>
+</body>
 </html>
