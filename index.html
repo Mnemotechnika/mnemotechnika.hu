@@ -62,6 +62,10 @@
 			friction: 0.1
 		};
 
+		location.search.replace(/(\w+)=([\d.]+)/g, function (match, key, value) {
+			if (typeof CONFIG[key] === 'number') CONFIG[key] = parseFloat(value);
+		});
+
 		var logo = document.getElementById('logo');
 		logo.querySelector('path').setAttribute('fill', CONFIG.color);
 		var image = 'data:image/svg+xml,' + encodeURIComponent(new XMLSerializer().serializeToString(logo));
