@@ -71,7 +71,7 @@
 		var image = 'data:image/svg+xml,' + encodeURIComponent(new XMLSerializer().serializeToString(logo));
 		document.getElementById('favicon').href = image;
 
-		var levels = Math.min(Math.ceil(Math.log(0.02) / Math.log(CONFIG.cameraGain)), 30);
+		var levels = Math.min(Math.ceil(Math.log(0.02) / Math.log(CONFIG.cameraGain)), 34);
 		var screens = [];
 		var parent = document.body;
 		for (var i = 0; i <= levels; i++) {
