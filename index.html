@@ -91,7 +91,10 @@
 			}
 		}
 		resize();
-		addEventListener('resize', resize);
+		addEventListener('resize', function () {
+			resize();
+			wake();
+		});
 
 		var state = {
 			aimX: 0, aimY: 0, tiltX: 0, tiltY: 0, roll: 0, wheel: 0,
@@ -106,11 +109,13 @@
 			state.tiltY = (touch.clientX / innerWidth * 2 - 1) * CONFIG.touchTilt;
 			state.tiltX = -(touch.clientY / innerHeight * 2 - 1) * CONFIG.touchTilt;
 			event.preventDefault();
+			wake();
 		}
 		addEventListener('touchstart', onTouch, { passive: false });
 		addEventListener('touchmove', onTouch, { passive: false });
 		addEventListener('touchend', function (event) {
 			if (event.touches.length === 0) state.tiltX = state.tiltY = 0;
+			wake();
 		});
 
 		addEventListener('mousemove', function (event) {
@@ -121,15 +126,18 @@
 			state.mouse = true;
 			state.aimX = (event.clientX - innerWidth / 2) * CONFIG.aimSensitivity;
 			state.aimY = (event.clientY - innerHeight / 2) * CONFIG.aimSensitivity;
+			wake();
 		});
 
 		document.documentElement.addEventListener('mouseleave', function () {
 			state.aimX = state.aimY = 0;
+			wake();
 		});
 
 		addEventListener('onwheel' in document ? 'wheel' : 'mousewheel', function (event) {
 			var delta = event.deltaY !== undefined ? event.deltaY * (event.deltaMode === 1 ? 33 : 1) : -event.wheelDelta;
 			state.wheel += delta * CONFIG.wheelSensitivity;
+			wake();
 		});
 
 		function rotationMatrix(alpha, beta, gamma) {
@@ -163,9 +171,10 @@
 			var r = relativeRotation(state.base, matrix);
 			var tiltX = -Math.atan2(-r[1][2], r[2][2]) * 180 / Math.PI;
 			var tiltY = Math.asin(Math.max(-1, Math.min(1, r[0][2]))) * 180 / Math.PI;
-			state.aimX = tiltY / CONFIG.tiltAim * innerWidth / 2 * CONFIG.aimSensitivity;
-			state.aimY = -tiltX / CONFIG.tiltAim * innerHeight / 2 * CONFIG.aimSensitivity;
-			state.roll = -Math.atan2(-r[0][1], r[0][0]) * 180 / Math.PI;
+			state.aimX = round(tiltY / CONFIG.tiltAim * innerWidth / 2 * CONFIG.aimSensitivity);
+			state.aimY = round(-tiltX / CONFIG.tiltAim * innerHeight / 2 * CONFIG.aimSensitivity);
+			state.roll = round(-Math.atan2(-r[0][1], r[0][0]) * 180 / Math.PI);
+			wake();
 		});
 		setTimeout(function () {
 			state.base = null;
@@ -178,35 +187,55 @@
 			});
 		}
 
+		function round(value) {
+			return Math.round(value * 10) / 10;
+		}
+
 		var cameraScale = 1 / (2 * CONFIG.cameraDistance * Math.tan(CONFIG.cameraFov / 2 * Math.PI / 180));
 		var trail = [];
+		var running = false;
 
 		var requestFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || function (callback) {
 			setTimeout(callback, 16);
 		};
 
+		function wake() {
+			if (running) return;
+			running = true;
+			requestFrame(frame);
+		}
+
+		function follow(current, target) {
+			var next = current + (target - current) * CONFIG.friction;
+			return Math.abs(target - next) < 0.01 ? target : next;
+		}
+
 		function frame() {
-			state.ax += (state.aimX - state.ax) * CONFIG.friction;
-			state.ay += (state.aimY - state.ay) * CONFIG.friction;
-			state.tx += (state.tiltX - state.tx) * CONFIG.friction;
-			state.ty += (state.tiltY - state.ty) * CONFIG.friction;
-			state.tr += (state.roll + state.wheel - state.tr) * CONFIG.friction;
+			state.ax = follow(state.ax, state.aimX);
+			state.ay = follow(state.ay, state.aimY);
+			state.tx = follow(state.tx, state.tiltX);
+			state.ty = follow(state.ty, state.tiltY);
+			state.tr = follow(state.tr, state.roll + state.wheel);
 			var camera = 'perspective(' + CONFIG.cameraDistance * innerWidth + 'px) '
 				+ 'rotateX(' + state.tx + 'deg) rotateY(' + state.ty + 'deg) '
 				+ 'rotate(' + (CONFIG.cameraAngle + state.tr) + 'deg) '
 				+ 'scale(' + cameraScale + ') '
 				+ 'translate(' + -state.ax + 'px, ' + -state.ay + 'px)';
 			var now = Date.now();
-			trail.unshift({ time: now, camera: camera });
+			if (!trail.length || trail[0].camera !== camera) trail.unshift({ time: now, camera: camera });
 			var k = 0;
 			for (var i = 1; i < screens.length; i++) {
 				while (k < trail.length - 1 && trail[k].time > now - i * CONFIG.cameraLatency) k++;
-				screens[i].style.webkitTransform = screens[i].style.transform = trail[k].camera;
+				if (screens[i].camera !== trail[k].camera) {
+					screens[i].camera = trail[k].camera;
+					screens[i].style.webkitTransform = screens[i].style.transform = trail[k].camera;
+				}
 			}
 			trail.length = k + 1;
-			requestFrame(frame);
+			running = trail.length > 1;
+			if (running) requestFrame(frame);
 		}
-		frame();
+		wake();
 	</script>
 </body>
 </html>
