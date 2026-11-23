@@ -99,23 +99,44 @@
 		var state = {
 			aimX: 0, aimY: 0, tiltX: 0, tiltY: 0, roll: 0, wheel: 0,
 			ax: 0, ay: 0, tx: 0, ty: 0, tr: 0,
-			mouse: false, base: null, portrait: null, lastTouch: 0, lastMouse: null
+			mouse: false, dragging: false, base: null, portrait: null, lastTouch: 0, lastMouse: null
 		};
+
+		function tiltTo(x, y) {
+			state.tiltY = (x / innerWidth * 2 - 1) * CONFIG.touchTilt;
+			state.tiltX = -(y / innerHeight * 2 - 1) * CONFIG.touchTilt;
+			wake();
+		}
+
+		function release() {
+			state.dragging = false;
+			state.tiltX = state.tiltY = 0;
+			wake();
+		}
 
 		function onTouch(event) {
 			state.lastTouch = Date.now();
 			var touch = event.touches[0];
 			if (!touch) return;
-			state.tiltY = (touch.clientX / innerWidth * 2 - 1) * CONFIG.touchTilt;
-			state.tiltX = -(touch.clientY / innerHeight * 2 - 1) * CONFIG.touchTilt;
+			tiltTo(touch.clientX, touch.clientY);
 			event.preventDefault();
-			wake();
 		}
 		addEventListener('touchstart', onTouch, { passive: false });
 		addEventListener('touchmove', onTouch, { passive: false });
 		addEventListener('touchend', function (event) {
-			if (event.touches.length === 0) state.tiltX = state.tiltY = 0;
-			wake();
+			if (event.touches.length === 0) release();
+		});
+
+		addEventListener('mousedown', function (event) {
+			if (event.button !== 0 || Date.now() - state.lastTouch < 1000) return;
+			state.mouse = true;
+			state.dragging = true;
+			tiltTo(event.clientX, event.clientY);
+			event.preventDefault();
+		});
+
+		addEventListener('mouseup', function () {
+			if (state.dragging) release();
 		});
 
 		addEventListener('mousemove', function (event) {
@@ -124,6 +145,7 @@
 			if (!last || (last[0] === event.clientX && last[1] === event.clientY)) return;
 			if (Date.now() - state.lastTouch < 1000) return;
 			state.mouse = true;
+			if (state.dragging) return tiltTo(event.clientX, event.clientY);
 			state.aimX = (event.clientX - innerWidth / 2) * CONFIG.aimSensitivity;
 			state.aimY = (event.clientY - innerHeight / 2) * CONFIG.aimSensitivity;
 			wake();
@@ -131,7 +153,7 @@
 
 		document.documentElement.addEventListener('mouseleave', function () {
 			state.aimX = state.aimY = 0;
-			wake();
+			release();
 		});
 
 		addEventListener('onwheel' in document ? 'wheel' : 'mousewheel', function (event) {
